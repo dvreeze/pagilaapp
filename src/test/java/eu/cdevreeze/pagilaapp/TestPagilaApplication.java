@@ -21,7 +21,9 @@ import org.springframework.boot.SpringApplication;
 /**
  * Entrypoint for the application for testing purposes, using the PostgreSQL test Docker container.
  * <p>
- * Override the web server port with system property "server.port".
+ * Override the web server port with system property "server.port". Thus, many instances of this
+ * program can run simultaneously, without interfering with each other or even with the real
+ * application, or integration tests.
  *
  * @author Chris de Vreeze
  */

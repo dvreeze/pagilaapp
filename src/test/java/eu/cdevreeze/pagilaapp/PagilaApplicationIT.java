@@ -37,10 +37,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Integration test verifying that the application context loads property, using a PostgreSQL
  * test Docker container.
+ * <p>
+ * Note that this test does not interfere with the real program or with the "test program".
+ * After all, both web server port and PostgreSQL port are generated non-used port numbers.
  *
  * @author Chris de Vreeze
  */
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @NullUnmarked
 class PagilaApplicationIT {
 
