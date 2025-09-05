@@ -15,12 +15,11 @@
  */
 
 /**
- * Web layer, using Spring Web MVC. It is agnostic of the implementation details of the service layer,
- * but instead uses the service layer through its purely abstract API contract.
+ * Service layer implementation.
  *
  * @author Chris de Vreeze
  */
 @NullMarked
-package eu.cdevreeze.pagilaapp.web;
+package eu.cdevreeze.pagilaapp.service.impl;
 
 import org.jspecify.annotations.NullMarked;

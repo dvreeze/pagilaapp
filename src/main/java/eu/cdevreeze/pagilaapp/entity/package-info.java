@@ -31,4 +31,7 @@
  *
  * @author Chris de Vreeze
  */
+@NullUnmarked
 package eu.cdevreeze.pagilaapp.entity;
+
+import org.jspecify.annotations.NullUnmarked;

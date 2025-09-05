@@ -67,6 +67,12 @@
 			<groupId>com.fasterxml.jackson.datatype</groupId>
 			<artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
+		<!-- JSpecify annotations not provided by Spring initializr; hence, the explicit version -->
+		<dependency>
+			<groupId>org.jspecify</groupId>
+			<artifactId>jspecify</artifactId>
+			<version>1.0.0</version>
+		</dependency>
 
 		<!-- Picked up by Spring Boot, along with JDBC driver configuration -->
 		<dependency>
