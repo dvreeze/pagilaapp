@@ -27,6 +27,8 @@ import org.testcontainers.utility.MountableFile;
 
 /**
  * Test containers configuration for the PostgreSQL Docker container.
+ * <p>
+ * See <a href="https://www.docker.com/blog/testcontainers-best-practices/">Testcontainers best practices</a>.
  *
  * @author Chris de Vreeze
  */
