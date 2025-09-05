@@ -71,7 +71,7 @@ public class DefaultAddressService implements AddressService {
         citySg.addSubgraph(CityEntity_.country);
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities dp not escape the persistence context
+        // Note that JPA entities do not escape the persistence context
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, eg)
                 .getResultStream()
