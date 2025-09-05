@@ -20,6 +20,8 @@ import org.springframework.boot.SpringApplication;
 
 /**
  * Entrypoint for the application for testing purposes, using the PostgreSQL test Docker container.
+ * <p>
+ * Override the web server port with system property "server.port".
  *
  * @author Chris de Vreeze
  */
