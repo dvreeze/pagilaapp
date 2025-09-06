@@ -34,7 +34,7 @@
                     <td th:text="${film.releaseYearOption.isPresent ? film.releaseYearOption.orElseThrow : ''}">releaseYear</td>
                     <td th:text="${film.language}">language</td>
                     <td th:text="${film.categories.![name]}">categories</td>
-                    <td th:text="${film.actors.![name]}">actors</td>
+                    <td th:text="${film.actorNames}">actors</td>
                 </tr>
                 </tbody>
             </table>

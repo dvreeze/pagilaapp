@@ -128,5 +128,20 @@ class PagilaApplicationIT {
                         .filter(c -> c.equalsIgnoreCase("travel"))
                         .collect(Collectors.toSet());
         assertThat(travelCategories).isEqualTo(Set.of("Travel"));
+
+        String actorFirstName = "Jennifer";
+        String actorLastName = "Davis";
+        List<Film> jenniferDavisFilms = filmService.findFilmsByActor(actorFirstName, actorLastName);
+
+        assertThat(jenniferDavisFilms.size()).isGreaterThan(10);
+        Set<String> actorNames =
+                jenniferDavisFilms.stream()
+                        .flatMap(f -> f.actorNames().stream())
+                        .filter(c -> c.equalsIgnoreCase(String.format("%s %s", actorFirstName, actorLastName)))
+                        .collect(Collectors.toSet());
+        assertThat(actorNames).isEqualTo(Set.of("JENNIFER DAVIS"));
+
+        System.out.println("Jennifer Davis films:");
+        jenniferDavisFilms.forEach(System.out::println);
     }
 }

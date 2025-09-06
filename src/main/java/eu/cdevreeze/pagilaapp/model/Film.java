@@ -44,4 +44,8 @@ public record Film(
         Optional<String> ratingOption,
         Optional<ImmutableSet<String>> specialFeaturesOption
 ) {
+
+    public ImmutableSet<String> actorNames() {
+        return actors().stream().map(Actor::name).collect(ImmutableSet.toImmutableSet());
+    }
 }
