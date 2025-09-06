@@ -81,7 +81,7 @@ public class DefaultAddressService implements AddressService {
 
     private Address convertEntityToModel(AddressEntity addressEntity) {
         // Called within the persistence context
-        // If needed associated data has already been loaded, this will not trigger the N + 1 problem
+        // The needed associated data has already been loaded, so this will not trigger the N + 1 problem
         return new Address(
                 Stream.ofNullable(addressEntity.getId()).mapToInt(i -> i).findFirst(),
                 addressEntity.getAddress(),

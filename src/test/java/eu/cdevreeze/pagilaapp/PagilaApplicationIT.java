@@ -17,7 +17,10 @@
 package eu.cdevreeze.pagilaapp;
 
 import eu.cdevreeze.pagilaapp.model.Address;
+import eu.cdevreeze.pagilaapp.model.Category;
+import eu.cdevreeze.pagilaapp.model.Film;
 import eu.cdevreeze.pagilaapp.service.AddressService;
+import eu.cdevreeze.pagilaapp.service.FilmService;
 import org.jspecify.annotations.NullUnmarked;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -31,6 +34,8 @@ import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.MountableFile;
 
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,6 +54,9 @@ class PagilaApplicationIT {
 
     @Autowired
     private AddressService addressService;
+
+    @Autowired
+    private FilmService filmService;
 
     @ServiceConnection
     private final static PostgreSQLContainer<?> postgres =
@@ -86,10 +94,39 @@ class PagilaApplicationIT {
 
     @Test
     void contextLoads() {
+        assertThat(addressService).isNotNull();
+        assertThat(filmService).isNotNull();
+    }
+
+    @Test
+    void findsAddresses() {
         List<Address> addresses = addressService.findAllAddresses();
 
         int numberOfAddresses = addresses.size();
         assertThat(numberOfAddresses).isGreaterThan(100);
     }
 
+    @Test
+    void findsFilms() {
+        List<Film> allFilms = filmService.findAllFilms();
+        assertThat(allFilms.size()).isGreaterThan(5000);
+
+        String language = "english";
+        List<Film> englishFilms = filmService.findFilmsByLanguage(language);
+
+        assertThat(englishFilms.size()).isGreaterThan(100);
+        Set<String> languages = englishFilms.stream().map(Film::language).collect(Collectors.toSet());
+        assertThat(languages).isEqualTo(Set.of("English"));
+
+        String category = "travel";
+        List<Film> travelFilms = filmService.findFilmsByCategory(category);
+
+        assertThat(travelFilms.size()).isGreaterThan(100);
+        Set<String> travelCategories =
+                travelFilms.stream()
+                        .flatMap(f -> f.categories().stream().map(Category::name))
+                        .filter(c -> c.equalsIgnoreCase("travel"))
+                        .collect(Collectors.toSet());
+        assertThat(travelCategories).isEqualTo(Set.of("Travel"));
+    }
 }
