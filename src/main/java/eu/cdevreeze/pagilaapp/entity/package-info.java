@@ -28,6 +28,18 @@
  * Note that one-to-many and many-to-many associations are already lazy by default in JPA.
  * It is only for one-to-one and many-to-one associations that we override the default (of eager fetching).
  * In other words, this practice embraces the flexibility of the relational model, joining tables on an ad-hoc basis.
+ * That is, in this way we work with the database and not against it. Combining this with the use
+ * of entity graphs during ad-hoc querying our JPQL/Criteria queries are much closer to the generated
+ * SQL, while avoiding the N + 1 problem.
+ * <p>
+ * Indeed, JPQL can be seen conceptually as an object-oriented SQL dialect, making it more pleasant
+ * to access the database from Java code. Joins are witten as "path navigation", and result sets are
+ * "automatically" converted to nested entity object graphs (especially when using entity graphs).
+ * <p>
+ * Also note that our criteria queries allow us to work with the database in a fully type-safe way.
+ * If the database schema changes, the validation of the JPA entity classes against the schema likely
+ * fails. After fixing that, an updated JPA metamodel is generated, and the criteria queries are checked
+ * by the Java compiler against that updated metamodel.
  *
  * @author Chris de Vreeze
  */
