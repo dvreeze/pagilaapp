@@ -24,7 +24,7 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record City(
-        OptionalInt id,
+        OptionalInt idOption,
         String city,
         String country
 ) {

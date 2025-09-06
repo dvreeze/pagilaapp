@@ -24,7 +24,7 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record Category(
-        OptionalInt id,
+        OptionalInt idOption,
         String name
 ) {
 }

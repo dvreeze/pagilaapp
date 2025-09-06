@@ -135,6 +135,43 @@ public class DefaultFilmService implements FilmService {
                 .collect(ImmutableList.toImmutableList());
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public ImmutableList<Film> findFilmsByActor(String firstName, String lastName) {
+        // First build up the query (without worrying about the load/fetch graph)
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
+
+        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
+        Join<FilmEntity, FilmActorEntity> filmActorJoin = filmRoot.join(FilmEntity_.actors, JoinType.LEFT);
+        Join<FilmActorEntity, ActorEntity> actorJoin = filmActorJoin.join(FilmActorEntity_.actor, JoinType.LEFT);
+        cq.where(
+                cb.and(
+                        cb.equal(
+                                cb.upper(actorJoin.get(ActorEntity_.firstName)),
+                                cb.literal(firstName.toUpperCase())
+                        ),
+                        cb.equal(
+                                cb.upper(actorJoin.get(ActorEntity_.lastName)),
+                                cb.literal(lastName.toUpperCase())
+                        )
+                )
+        );
+        cq.select(filmRoot);
+
+        // Next build up the entity graph, to specify which associated data should be fetched
+        // At the same time, this helps achieve good performance, by solving the N + 1 problem
+        EntityGraph<FilmEntity> filmGraph = createEntityGraph();
+
+        // Run the query, providing the load graph as query hint
+        // Note that JPA entities do not escape the persistence context
+        return entityManager.createQuery(cq)
+                .setHint(LOAD_GRAPH_KEY, filmGraph)
+                .getResultStream()
+                .map(this::convertEntityToModel)
+                .collect(ImmutableList.toImmutableList());
+    }
+
     private EntityGraph<FilmEntity> createEntityGraph() {
         EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
         filmGraph.addSubgraph(FilmEntity_.language);

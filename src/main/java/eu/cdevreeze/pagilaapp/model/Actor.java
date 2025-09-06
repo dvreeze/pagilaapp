@@ -24,8 +24,12 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record Actor(
-        OptionalInt id,
+        OptionalInt idOption,
         String firstName,
         String lastName
 ) {
+
+    public String name() {
+        return String.format("%s %s", firstName(), lastName());
+    }
 }

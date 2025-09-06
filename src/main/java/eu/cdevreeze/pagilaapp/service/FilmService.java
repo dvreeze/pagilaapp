@@ -31,4 +31,6 @@ public interface FilmService {
     ImmutableList<Film> findFilmsByLanguage(String language);
 
     ImmutableList<Film> findFilmsByCategory(String category);
+
+    ImmutableList<Film> findFilmsByActor(String firstName, String lastName);
 }

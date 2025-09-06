@@ -29,7 +29,7 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record Film(
-        OptionalInt id,
+        OptionalInt idOption,
         String title,
         Optional<String> descriptionOption,
         Optional<Year> releaseYearOption,
