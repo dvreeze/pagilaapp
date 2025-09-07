@@ -83,10 +83,12 @@ public class DefaultFilmService implements FilmService {
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
         Join<FilmEntity, LanguageEntity> languageJoin = filmRoot.join(FilmEntity_.language);
+        // No need to explicitly set a query parameter when using the Criteria API.
+        // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
         cq.where(
                 cb.equal(
                         cb.upper(languageJoin.get(LanguageEntity_.rawName)), // cb.trim does not work here but apparently is not needed
-                        cb.literal(language.toUpperCase().strip())
+                        language.toUpperCase().strip()
                 )
         );
         cq.select(filmRoot);
@@ -114,10 +116,12 @@ public class DefaultFilmService implements FilmService {
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
         Join<FilmEntity, FilmCategoryEntity> filmCategoryJoin = filmRoot.join(FilmEntity_.categories, JoinType.LEFT);
         Join<FilmCategoryEntity, CategoryEntity> categoryJoin = filmCategoryJoin.join(FilmCategoryEntity_.category, JoinType.LEFT);
+        // No need to explicitly set a query parameter when using the Criteria API.
+        // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
         cq.where(
                 cb.equal(
                         cb.upper(categoryJoin.get(CategoryEntity_.name)),
-                        cb.literal(category.toUpperCase())
+                        category.toUpperCase()
                 )
         );
         cq.select(filmRoot);
@@ -145,15 +149,17 @@ public class DefaultFilmService implements FilmService {
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
         Join<FilmEntity, FilmActorEntity> filmActorJoin = filmRoot.join(FilmEntity_.actors, JoinType.LEFT);
         Join<FilmActorEntity, ActorEntity> actorJoin = filmActorJoin.join(FilmActorEntity_.actor, JoinType.LEFT);
+        // No need to explicitly set a query parameter when using the Criteria API.
+        // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
         cq.where(
                 cb.and(
                         cb.equal(
                                 cb.upper(actorJoin.get(ActorEntity_.firstName)),
-                                cb.literal(firstName.toUpperCase())
+                                firstName.toUpperCase()
                         ),
                         cb.equal(
                                 cb.upper(actorJoin.get(ActorEntity_.lastName)),
-                                cb.literal(lastName.toUpperCase())
+                                lastName.toUpperCase()
                         )
                 )
         );
