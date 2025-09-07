@@ -16,8 +16,12 @@
 
 package eu.cdevreeze.pagilaapp.web.controller;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import eu.cdevreeze.pagilaapp.model.Film;
 import eu.cdevreeze.pagilaapp.service.FilmService;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -39,7 +43,10 @@ public class FilmController {
     public String findAllFilms(
             Model model
     ) {
-        model.addAttribute("films", filmService.findAllFilms());
+        Preconditions.checkArgument(!TransactionSynchronizationManager.isActualTransactionActive());
+
+        ImmutableList<Film> films = filmService.findAllFilms();
+        model.addAttribute("films", films);
         model.addAttribute("title", "Films");
 
         return "films";

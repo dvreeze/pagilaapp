@@ -109,7 +109,7 @@ class PagilaApplicationIT {
     @Test
     void findsFilms() {
         List<Film> allFilms = filmService.findAllFilms();
-        assertThat(allFilms.size()).isGreaterThan(5000);
+        assertThat(allFilms.size()).isGreaterThan(850);
 
         String language = "english";
         List<Film> englishFilms = filmService.findFilmsByLanguage(language);

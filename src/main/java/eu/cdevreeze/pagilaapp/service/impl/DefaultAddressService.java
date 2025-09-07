@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.AddressEntity;
 import eu.cdevreeze.pagilaapp.entity.AddressEntity_;
@@ -26,12 +27,15 @@ import eu.cdevreeze.pagilaapp.model.City;
 import eu.cdevreeze.pagilaapp.service.AddressService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
+import org.hibernate.internal.SessionImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -48,6 +52,8 @@ public class DefaultAddressService implements AddressService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
+    // Shared thread-safe proxy for the actual transactional EntityManager that differs for each transaction
+    @PersistenceContext
     private final EntityManager entityManager;
 
     public DefaultAddressService(EntityManager entityManager) {
@@ -57,6 +63,9 @@ public class DefaultAddressService implements AddressService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Address> findAllAddresses() {
+        Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
+        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<AddressEntity> cq = cb.createQuery(AddressEntity.class);

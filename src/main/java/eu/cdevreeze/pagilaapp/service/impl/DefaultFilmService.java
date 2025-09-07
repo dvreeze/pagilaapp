@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.service.impl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.pagilaapp.entity.*;
@@ -25,12 +26,18 @@ import eu.cdevreeze.pagilaapp.model.Film;
 import eu.cdevreeze.pagilaapp.service.FilmService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.criteria.*;
+import org.hibernate.internal.SessionImpl;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
+import java.util.function.BiFunction;
 import java.util.stream.Stream;
 
 /**
@@ -45,6 +52,8 @@ public class DefaultFilmService implements FilmService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
+    // Shared thread-safe proxy for the actual transactional EntityManager that differs for each transaction
+    @PersistenceContext
     private final EntityManager entityManager;
 
     public DefaultFilmService(EntityManager entityManager) {
@@ -54,29 +63,43 @@ public class DefaultFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findAllFilms() {
-        // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
+        Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
+        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
 
-        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
-        cq.select(filmRoot);
+        // Trying to find all films the same way as the queries below, but without using joins/where-clause, this caused
+        // incomplete data to be returned. That is, the fetch joins with all the actors of the film did not take place.
+        // Hence, we build up the result with a small (fixed) number of similar queries (much like the ones in the
+        // other methods below), combining the results afterward.
 
-        // Next build up the entity graph, to specify which associated data should be fetched
-        // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<FilmEntity> filmGraph = createEntityGraph();
+        List<String> languages = List.of("English", "German", "French", "Italian", "Japanese", "Mandarin");
 
-        // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
-        return entityManager.createQuery(cq)
-                .setHint(LOAD_GRAPH_KEY, filmGraph)
-                .getResultStream()
-                .map(this::convertEntityToModel)
+        List<BiFunction<CriteriaBuilder, Path<String>, Predicate>> langPredBuilders = languages.stream()
+                .map(lang -> (BiFunction<CriteriaBuilder, Path<String>, Predicate>) (cb, langPathExpr) ->
+                        cb.equal(
+                                cb.upper(langPathExpr),
+                                lang.toUpperCase().strip()
+                        )).toList();
+        BiFunction<CriteriaBuilder, Path<String>, Predicate> otherLangPredBuilder = (cb, langPathExpr) ->
+                cb.not(
+                        cb.or(langPredBuilders.stream().map(lpb -> lpb.apply(cb, langPathExpr)).toList())
+                );
+        List<BiFunction<CriteriaBuilder, Path<String>, Predicate>> allLangPredBuilders =
+                Stream.of(langPredBuilders.stream(), Stream.of(otherLangPredBuilder))
+                        .flatMap(b -> b)
+                        .toList();
+
+        return allLangPredBuilders.stream()
+                .flatMap(b -> findFilmsByLanguage(b).stream())
+                .sorted(Comparator.comparingInt(film -> film.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByLanguage(String language) {
+        Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
+        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
@@ -109,6 +132,9 @@ public class DefaultFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByCategory(String category) {
+        Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
+        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
@@ -142,6 +168,9 @@ public class DefaultFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByActor(String firstName, String lastName) {
+        Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
+        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
@@ -162,6 +191,35 @@ public class DefaultFilmService implements FilmService {
                                 lastName.toUpperCase()
                         )
                 )
+        );
+        cq.select(filmRoot);
+
+        // Next build up the entity graph, to specify which associated data should be fetched
+        // At the same time, this helps achieve good performance, by solving the N + 1 problem
+        EntityGraph<FilmEntity> filmGraph = createEntityGraph();
+
+        // Run the query, providing the load graph as query hint
+        // Note that JPA entities do not escape the persistence context
+        return entityManager.createQuery(cq)
+                .setHint(LOAD_GRAPH_KEY, filmGraph)
+                .getResultStream()
+                .map(this::convertEntityToModel)
+                .collect(ImmutableList.toImmutableList());
+    }
+
+    private ImmutableList<Film> findFilmsByLanguage(BiFunction<CriteriaBuilder, Path<String>, Predicate> languagePredicateBuilder) {
+        Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
+
+        // First build up the query (without worrying about the load/fetch graph)
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
+
+        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
+        Join<FilmEntity, LanguageEntity> languageJoin = filmRoot.join(FilmEntity_.language);
+        // No need to explicitly set a query parameter when using the Criteria API.
+        // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
+        cq.where(
+                languagePredicateBuilder.apply(cb, languageJoin.get(LanguageEntity_.rawName))
         );
         cq.select(filmRoot);
 
