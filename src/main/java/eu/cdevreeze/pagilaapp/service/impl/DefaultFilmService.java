@@ -34,10 +34,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.BiFunction;
+import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
@@ -47,6 +45,9 @@ import java.util.stream.Stream;
  */
 @Service
 public class DefaultFilmService implements FilmService {
+
+    private record FilmActors(int filmId, ImmutableSet<Actor> actors) {
+    }
 
     // See https://thorben-janssen.com/hibernate-tips-how-to-bootstrap-hibernate-with-spring-boot/
 
@@ -68,29 +69,44 @@ public class DefaultFilmService implements FilmService {
 
         // Trying to find all films the same way as the queries below, but without using joins/where-clause, this caused
         // incomplete data to be returned. That is, the fetch joins with all the actors of the film did not take place.
-        // Hence, we build up the result with a small (fixed) number of similar queries (much like the ones in the
-        // other methods below), combining the results afterward.
+        // Hence, we build up 2 queries: one without returning actors and the other returning just film actors.
 
-        List<String> languages = List.of("English", "German", "French", "Italian", "Japanese", "Mandarin");
+        // First build up the query (without worrying about the load/fetch graph)
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
-        List<BiFunction<CriteriaBuilder, Path<String>, Predicate>> langPredBuilders = languages.stream()
-                .map(lang -> (BiFunction<CriteriaBuilder, Path<String>, Predicate>) (cb, langPathExpr) ->
-                        cb.equal(
-                                cb.upper(langPathExpr),
-                                lang.toUpperCase().strip()
-                        )).toList();
-        BiFunction<CriteriaBuilder, Path<String>, Predicate> otherLangPredBuilder = (cb, langPathExpr) ->
-                cb.not(
-                        cb.or(langPredBuilders.stream().map(lpb -> lpb.apply(cb, langPathExpr)).toList())
-                );
-        List<BiFunction<CriteriaBuilder, Path<String>, Predicate>> allLangPredBuilders =
-                Stream.of(langPredBuilders.stream(), Stream.of(otherLangPredBuilder))
-                        .flatMap(b -> b)
-                        .toList();
+        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
+        cq.select(filmRoot);
 
-        return allLangPredBuilders.stream()
-                .flatMap(b -> findFilmsByLanguage(b).stream())
-                .sorted(Comparator.comparingInt(film -> film.idOption().orElse(-1)))
+        // Next build up the entity graph, to specify which associated data should be fetched
+        // At the same time, this helps achieve good performance, by solving the N + 1 problem
+        EntityGraph<FilmEntity> filmGraph = createEntityGraphWithoutActors();
+
+        // Run the query, providing the load graph as query hint
+        // Note that JPA entities do not escape the persistence context
+        List<Film> filmsWithoutActors = entityManager.createQuery(cq)
+                .setHint(LOAD_GRAPH_KEY, filmGraph)
+                .getResultStream()
+                .map(this::convertEntityToModel)
+                .toList();
+
+        // Now run the second query, to get the film actors
+        // TODO Improve, and start with actors instead of films, to reduce the number of output rows
+
+        List<FilmActors> filmActors = findAllFilmActors();
+        Map<Integer, ImmutableSet<Actor>> actorsByFilmId = filmActors
+                .stream()
+                .collect(Collectors.toMap(
+                        FilmActors::filmId,
+                        FilmActors::actors,
+                        (filmActors1, filmActors2) ->
+                                Stream.concat(filmActors1.stream(), filmActors2.stream()).collect(ImmutableSet.toImmutableSet())
+                ));
+
+        // Combine the query results
+        return filmsWithoutActors
+                .stream()
+                .map(f -> f.withActors(Objects.requireNonNull(actorsByFilmId.get(f.idOption().orElseThrow()))))
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -207,7 +223,7 @@ public class DefaultFilmService implements FilmService {
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private ImmutableList<Film> findFilmsByLanguage(BiFunction<CriteriaBuilder, Path<String>, Predicate> languagePredicateBuilder) {
+    private ImmutableList<FilmActors> findAllFilmActors() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
 
         // First build up the query (without worrying about the load/fetch graph)
@@ -215,24 +231,19 @@ public class DefaultFilmService implements FilmService {
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
-        Join<FilmEntity, LanguageEntity> languageJoin = filmRoot.join(FilmEntity_.language);
-        // No need to explicitly set a query parameter when using the Criteria API.
-        // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
-        cq.where(
-                languagePredicateBuilder.apply(cb, languageJoin.get(LanguageEntity_.rawName))
-        );
         cq.select(filmRoot);
 
         // Next build up the entity graph, to specify which associated data should be fetched
         // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<FilmEntity> filmGraph = createEntityGraph();
+        EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
+        filmGraph.addElementSubgraph(FilmEntity_.actors).addSubgraph(FilmActorEntity_.actor);
 
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
-                .map(this::convertEntityToModel)
+                .map(this::extractFilmActors)
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -244,6 +255,15 @@ public class DefaultFilmService implements FilmService {
         filmCategoryGraph.addSubgraph(FilmCategoryEntity_.category);
         Subgraph<FilmActorEntity> filmActorGraph = filmGraph.addElementSubgraph(FilmEntity_.actors);
         filmActorGraph.addSubgraph(FilmActorEntity_.actor);
+        return filmGraph;
+    }
+
+    private EntityGraph<FilmEntity> createEntityGraphWithoutActors() {
+        EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
+        filmGraph.addSubgraph(FilmEntity_.language);
+        filmGraph.addSubgraph(FilmEntity_.originalLanguage);
+        Subgraph<FilmCategoryEntity> filmCategoryGraph = filmGraph.addElementSubgraph(FilmEntity_.categories);
+        filmCategoryGraph.addSubgraph(FilmCategoryEntity_.category);
         return filmGraph;
     }
 
@@ -266,7 +286,7 @@ public class DefaultFilmService implements FilmService {
                                 )
                         )
                         .collect(ImmutableSet.toImmutableSet()),
-                filmEntity.getActors()
+                Optional.ofNullable(filmEntity.getActors()).orElse(Set.of())
                         .stream()
                         .map(filmActor ->
                                 new Actor(
@@ -285,6 +305,24 @@ public class DefaultFilmService implements FilmService {
                         .map(specFeatures ->
                                 specFeatures.stream().collect(ImmutableSet.toImmutableSet())
                         )
+        );
+    }
+
+    private FilmActors extractFilmActors(FilmEntity filmEntity) {
+        // Called within the persistence context
+        // The needed associated data has already been loaded, so this will not trigger the N + 1 problem
+        return new FilmActors(
+                Objects.requireNonNull(filmEntity.getId()),
+                filmEntity.getActors()
+                        .stream()
+                        .map(filmActor ->
+                                new Actor(
+                                        Stream.ofNullable(filmActor.getActor().getId()).mapToInt(i -> i).findFirst(),
+                                        filmActor.getActor().getFirstName(),
+                                        filmActor.getActor().getLastName()
+                                )
+                        )
+                        .collect(ImmutableSet.toImmutableSet())
         );
     }
 }

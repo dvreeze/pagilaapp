@@ -48,4 +48,23 @@ public record Film(
     public ImmutableSet<String> actorNames() {
         return actors().stream().map(Actor::name).collect(ImmutableSet.toImmutableSet());
     }
+
+    public Film withActors(ImmutableSet<Actor> actors) {
+        return new Film(
+                idOption(),
+                title(),
+                descriptionOption(),
+                releaseYearOption(),
+                language(),
+                originalLanguageOption(),
+                categories(),
+                actors,
+                rentalDuration(),
+                rentalRate(),
+                lengthOption(),
+                replacementCost(),
+                ratingOption(),
+                specialFeaturesOption()
+        );
+    }
 }

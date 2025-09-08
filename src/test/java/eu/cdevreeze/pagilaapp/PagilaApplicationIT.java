@@ -109,12 +109,12 @@ class PagilaApplicationIT {
     @Test
     void findsFilms() {
         List<Film> allFilms = filmService.findAllFilms();
-        assertThat(allFilms.size()).isGreaterThan(850);
+        assertThat(allFilms.size()).isGreaterThan(1000); // Must be equal to 1000
 
         String language = "english";
         List<Film> englishFilms = filmService.findFilmsByLanguage(language);
 
-        assertThat(englishFilms.size()).isGreaterThan(100);
+        assertThat(englishFilms.size()).isEqualTo(585);
         Set<String> languages = englishFilms.stream().map(Film::language).collect(Collectors.toSet());
         assertThat(languages).isEqualTo(Set.of("English"));
 
