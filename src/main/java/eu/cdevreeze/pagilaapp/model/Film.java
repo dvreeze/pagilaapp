@@ -67,4 +67,23 @@ public record Film(
                 specialFeaturesOption()
         );
     }
+
+    public Film withCategories(ImmutableSet<Category> categories) {
+        return new Film(
+                idOption(),
+                title(),
+                descriptionOption(),
+                releaseYearOption(),
+                language(),
+                originalLanguageOption(),
+                categories,
+                actors(),
+                rentalDuration(),
+                rentalRate(),
+                lengthOption(),
+                replacementCost(),
+                ratingOption(),
+                specialFeaturesOption()
+        );
+    }
 }

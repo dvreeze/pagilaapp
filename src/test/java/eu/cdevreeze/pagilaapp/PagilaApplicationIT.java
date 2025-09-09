@@ -109,7 +109,7 @@ class PagilaApplicationIT {
     @Test
     void findsFilms() {
         List<Film> allFilms = filmService.findAllFilms();
-        assertThat(allFilms.size()).isGreaterThan(1000); // Must be equal to 1000
+        assertThat(allFilms.size()).isEqualTo(1000);
 
         String language = "english";
         List<Film> englishFilms = filmService.findFilmsByLanguage(language);
@@ -121,7 +121,7 @@ class PagilaApplicationIT {
         String category = "travel";
         List<Film> travelFilms = filmService.findFilmsByCategory(category);
 
-        assertThat(travelFilms.size()).isGreaterThan(100);
+        assertThat(travelFilms.size()).isEqualTo(151);
         Set<String> travelCategories =
                 travelFilms.stream()
                         .flatMap(f -> f.categories().stream().map(Category::name))
@@ -133,7 +133,7 @@ class PagilaApplicationIT {
         String actorLastName = "Davis";
         List<Film> jenniferDavisFilms = filmService.findFilmsByActor(actorFirstName, actorLastName);
 
-        assertThat(jenniferDavisFilms.size()).isGreaterThan(10);
+        assertThat(jenniferDavisFilms.size()).isEqualTo(22);
         Set<String> actorNames =
                 jenniferDavisFilms.stream()
                         .flatMap(f -> f.actorNames().stream())
