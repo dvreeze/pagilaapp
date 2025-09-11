@@ -75,14 +75,15 @@ public class DefaultAddressService implements AddressService {
 
         // Next build up the entity graph, to specify which associated data should be fetched
         // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<AddressEntity> eg = entityManager.createEntityGraph(AddressEntity.class);
-        Subgraph<CityEntity> citySg = eg.addSubgraph(AddressEntity_.city);
-        citySg.addSubgraph(CityEntity_.country);
+        EntityGraph<AddressEntity> addressGraph = entityManager.createEntityGraph(AddressEntity.class);
+        addressGraph.addAttributeNode(AddressEntity_.city);
+        Subgraph<CityEntity> citySubgraph = addressGraph.addSubgraph(AddressEntity_.city);
+        citySubgraph.addAttributeNode(CityEntity_.country);
 
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
         return entityManager.createQuery(cq)
-                .setHint(LOAD_GRAPH_KEY, eg)
+                .setHint(LOAD_GRAPH_KEY, addressGraph)
                 .getResultStream()
                 .map(this::convertEntityToModel)
                 .collect(ImmutableList.toImmutableList());

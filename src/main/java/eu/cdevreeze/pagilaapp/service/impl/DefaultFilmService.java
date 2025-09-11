@@ -46,12 +46,6 @@ import java.util.stream.Stream;
 @Service
 public class DefaultFilmService implements FilmService {
 
-    private record FilmActors(int filmId, ImmutableSet<Actor> actors) {
-    }
-
-    private record FilmCategories(int filmId, ImmutableSet<Category> categories) {
-    }
-
     // See https://thorben-janssen.com/hibernate-tips-how-to-bootstrap-hibernate-with-spring-boot/
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
@@ -73,53 +67,24 @@ public class DefaultFilmService implements FilmService {
         // Trying to find all films the same way as the queries below did not work. It led to loss of film actor data,
         // and lots of film data duplication. Hence, the use of multiple queries, combining the results afterward.
 
-        // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
+        Set<String> categories = findAllFilmCategories();
 
-        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
-        cq.select(filmRoot);
-
-        // Next build up the entity graph, to specify which associated data should be fetched
-        // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<FilmEntity> filmGraph = createEntityGraphWithoutActorsAndCategories();
-
-        // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
-        List<Film> filmsWithoutActorsAndCategories = entityManager.createQuery(cq)
-                .setHint(LOAD_GRAPH_KEY, filmGraph)
-                .getResultStream()
-                .map(this::convertEntityToModel)
-                .toList();
-
-        // Now run the second query, to get the film actors
-        // TODO Improve, and start with actors instead of films, to reduce the number of output rows (same for categories)
-
-        List<FilmActors> filmActors = findAllFilmActors();
-        Map<Integer, ImmutableSet<Actor>> actorsByFilmId = filmActors
+        int queryCount = 5;
+        Map<Integer, List<String>> categoryGroups = categories
                 .stream()
-                .collect(Collectors.toMap(
-                        FilmActors::filmId,
-                        FilmActors::actors,
-                        (filmActors1, filmActors2) ->
-                                Stream.concat(filmActors1.stream(), filmActors2.stream()).collect(ImmutableSet.toImmutableSet())
-                ));
+                .collect(Collectors.groupingBy(cat -> cat.length() % queryCount));
 
-        List<FilmCategories> filmCategories = findAllFilmCategories();
-        Map<Integer, ImmutableSet<Category>> categoriesByFilmId = filmCategories
+        Map<Integer, List<Film>> filmGroups = categoryGroups
+                .entrySet()
                 .stream()
-                .collect(Collectors.toMap(
-                        FilmCategories::filmId,
-                        FilmCategories::categories,
-                        (filmCategories1, filmCategories2) ->
-                                Stream.concat(filmCategories1.stream(), filmCategories2.stream()).collect(ImmutableSet.toImmutableSet())
-                ));
+                .map(kv -> Map.entry(kv.getKey(), findFilmsByCategories(ImmutableSet.copyOf(kv.getValue()))))
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 
-        // Combine the query results
-        return filmsWithoutActorsAndCategories
+        return filmGroups.values()
                 .stream()
-                .map(f -> f.withActors(Objects.requireNonNull(actorsByFilmId.get(f.idOption().orElseThrow()))))
-                .map(f -> f.withCategories(Objects.requireNonNull(categoriesByFilmId.get(f.idOption().orElseThrow()))))
+                .flatMap(Collection::stream)
+                .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
+                .distinct()
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -161,6 +126,12 @@ public class DefaultFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByCategory(String category) {
+        return findFilmsByCategories(ImmutableSet.of(category));
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories) {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
         System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
 
@@ -174,9 +145,8 @@ public class DefaultFilmService implements FilmService {
         // No need to explicitly set a query parameter when using the Criteria API.
         // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
         cq.where(
-                cb.equal(
-                        cb.upper(categoryJoin.get(CategoryEntity_.name)),
-                        category.toUpperCase()
+                cb.upper(categoryJoin.get(CategoryEntity_.name)).in(
+                        categories.stream().map(String::toUpperCase).collect(Collectors.toSet())
                 )
         );
         cq.select(filmRoot);
@@ -236,69 +206,35 @@ public class DefaultFilmService implements FilmService {
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private ImmutableList<FilmActors> findAllFilmActors() {
+    @Override
+    @Transactional(readOnly = true)
+    public ImmutableSet<String> findAllFilmCategories() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
+        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
 
-        // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
+        CriteriaQuery<String> cq = cb.createQuery(String.class);
 
-        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
-        cq.select(filmRoot);
+        Root<CategoryEntity> categoryRoot = cq.from(CategoryEntity.class);
+        cq.select(categoryRoot.get(CategoryEntity_.name));
 
-        // Next build up the entity graph, to specify which associated data should be fetched
-        // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
-        filmGraph.addElementSubgraph(FilmEntity_.actors).addSubgraph(FilmActorEntity_.actor);
-
-        // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
         return entityManager.createQuery(cq)
-                .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
-                .map(this::extractFilmActors)
-                .collect(ImmutableList.toImmutableList());
-    }
-
-    private ImmutableList<FilmCategories> findAllFilmCategories() {
-        Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-
-        // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
-
-        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
-        cq.select(filmRoot);
-
-        // Next build up the entity graph, to specify which associated data should be fetched
-        // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
-        filmGraph.addElementSubgraph(FilmEntity_.categories).addSubgraph(FilmCategoryEntity_.category);
-
-        // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
-        return entityManager.createQuery(cq)
-                .setHint(LOAD_GRAPH_KEY, filmGraph)
-                .getResultStream()
-                .map(this::extractFilmCategories)
-                .collect(ImmutableList.toImmutableList());
+                .collect(ImmutableSet.toImmutableSet());
     }
 
     private EntityGraph<FilmEntity> createEntityGraph() {
         EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
-        filmGraph.addSubgraph(FilmEntity_.language);
-        filmGraph.addSubgraph(FilmEntity_.originalLanguage);
-        Subgraph<FilmCategoryEntity> filmCategoryGraph = filmGraph.addElementSubgraph(FilmEntity_.categories);
-        filmCategoryGraph.addSubgraph(FilmCategoryEntity_.category);
-        Subgraph<FilmActorEntity> filmActorGraph = filmGraph.addElementSubgraph(FilmEntity_.actors);
-        filmActorGraph.addSubgraph(FilmActorEntity_.actor);
-        return filmGraph;
-    }
+        filmGraph.addAttributeNode(FilmEntity_.language);
+        filmGraph.addAttributeNode(FilmEntity_.originalLanguage);
 
-    private EntityGraph<FilmEntity> createEntityGraphWithoutActorsAndCategories() {
-        EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
-        filmGraph.addSubgraph(FilmEntity_.language);
-        filmGraph.addSubgraph(FilmEntity_.originalLanguage);
+        filmGraph.addAttributeNode(FilmEntity_.categories);
+        Subgraph<FilmCategoryEntity> filmCategorySubgraph = filmGraph.addElementSubgraph(FilmEntity_.categories);
+        filmCategorySubgraph.addAttributeNode(FilmCategoryEntity_.category);
+
+        filmGraph.addAttributeNode(FilmEntity_.actors);
+        Subgraph<FilmActorEntity> filmActorSubgraph = filmGraph.addElementSubgraph(FilmEntity_.actors);
+        filmActorSubgraph.addAttributeNode(FilmActorEntity_.actor);
         return filmGraph;
     }
 
@@ -314,22 +250,11 @@ public class DefaultFilmService implements FilmService {
                 Optional.ofNullable(filmEntity.getOriginalLanguage()).map(LanguageEntity::getRawName).map(String::strip),
                 filmEntity.getCategories()
                         .stream()
-                        .map(filmCat ->
-                                new Category(
-                                        Stream.ofNullable(filmCat.getCategory().getId()).mapToInt(i -> i).findFirst(),
-                                        filmCat.getCategory().getName()
-                                )
-                        )
+                        .map(this::extractCategory)
                         .collect(ImmutableSet.toImmutableSet()),
                 Optional.ofNullable(filmEntity.getActors()).orElse(Set.of())
                         .stream()
-                        .map(filmActor ->
-                                new Actor(
-                                        Stream.ofNullable(filmActor.getActor().getId()).mapToInt(i -> i).findFirst(),
-                                        filmActor.getActor().getFirstName(),
-                                        filmActor.getActor().getLastName()
-                                )
-                        )
+                        .map(this::extractActor)
                         .collect(ImmutableSet.toImmutableSet()),
                 filmEntity.getRentalDuration(),
                 filmEntity.getRentalRate(),
@@ -343,38 +268,22 @@ public class DefaultFilmService implements FilmService {
         );
     }
 
-    private FilmActors extractFilmActors(FilmEntity filmEntity) {
+    private Actor extractActor(FilmActorEntity filmActorEntity) {
         // Called within the persistence context
-        // The needed associated data has already been loaded, so this will not trigger the N + 1 problem
-        return new FilmActors(
-                Objects.requireNonNull(filmEntity.getId()),
-                filmEntity.getActors()
-                        .stream()
-                        .map(filmActor ->
-                                new Actor(
-                                        Stream.ofNullable(filmActor.getActor().getId()).mapToInt(i -> i).findFirst(),
-                                        filmActor.getActor().getFirstName(),
-                                        filmActor.getActor().getLastName()
-                                )
-                        )
-                        .collect(ImmutableSet.toImmutableSet())
+        // The needed associated data has already been loaded
+        return new Actor(
+                Stream.ofNullable(filmActorEntity.getActor().getId()).mapToInt(i -> i).findFirst(),
+                filmActorEntity.getActor().getFirstName(),
+                filmActorEntity.getActor().getLastName()
         );
     }
 
-    private FilmCategories extractFilmCategories(FilmEntity filmEntity) {
+    private Category extractCategory(FilmCategoryEntity filmCategoryEntity) {
         // Called within the persistence context
-        // The needed associated data has already been loaded, so this will not trigger the N + 1 problem
-        return new FilmCategories(
-                Objects.requireNonNull(filmEntity.getId()),
-                filmEntity.getCategories()
-                        .stream()
-                        .map(filmCat ->
-                                new Category(
-                                        Stream.ofNullable(filmCat.getCategory().getId()).mapToInt(i -> i).findFirst(),
-                                        filmCat.getCategory().getName()
-                                )
-                        )
-                        .collect(ImmutableSet.toImmutableSet())
+        // The needed associated data has already been loaded
+        return new Category(
+                Stream.ofNullable(filmCategoryEntity.getCategory().getId()).mapToInt(i -> i).findFirst(),
+                filmCategoryEntity.getCategory().getName()
         );
     }
 }

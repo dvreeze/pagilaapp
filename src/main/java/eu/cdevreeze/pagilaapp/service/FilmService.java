@@ -17,6 +17,7 @@
 package eu.cdevreeze.pagilaapp.service;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.pagilaapp.model.Film;
 
 /**
@@ -32,5 +33,9 @@ public interface FilmService {
 
     ImmutableList<Film> findFilmsByCategory(String category);
 
+    ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories);
+
     ImmutableList<Film> findFilmsByActor(String firstName, String lastName);
+
+    ImmutableSet<String> findAllFilmCategories();
 }
