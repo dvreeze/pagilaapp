@@ -69,10 +69,10 @@ public class DefaultFilmService implements FilmService {
 
         Set<String> categories = findAllFilmCategories();
 
-        int queryCount = 5;
+        int queryCount = 8;
         Map<Integer, List<String>> categoryGroups = categories
                 .stream()
-                .collect(Collectors.groupingBy(cat -> cat.length() % queryCount));
+                .collect(Collectors.groupingBy(cat -> cat.hashCode() % queryCount));
 
         Map<Integer, List<Film>> filmGroups = categoryGroups
                 .entrySet()
