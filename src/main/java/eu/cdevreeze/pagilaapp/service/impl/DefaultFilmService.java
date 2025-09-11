@@ -30,6 +30,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.criteria.*;
 import org.hibernate.internal.SessionImpl;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -44,6 +45,7 @@ import java.util.stream.Stream;
  * @author Chris de Vreeze
  */
 @Service
+@Primary
 public class DefaultFilmService implements FilmService {
 
     // See https://thorben-janssen.com/hibernate-tips-how-to-bootstrap-hibernate-with-spring-boot/
