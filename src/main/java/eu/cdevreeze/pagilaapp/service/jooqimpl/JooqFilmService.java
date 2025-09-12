@@ -25,7 +25,9 @@ import eu.cdevreeze.pagilaapp.model.Category;
 import eu.cdevreeze.pagilaapp.model.Film;
 import eu.cdevreeze.pagilaapp.service.FilmService;
 import org.jooq.DSLContext;
+import org.jooq.Record1;
 import org.jooq.Records;
+import org.jooq.SelectJoinStep;
 import org.jspecify.annotations.Nullable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,9 +54,7 @@ public class JooqFilmService implements FilmService {
     // We just write SQL, be it in Java, checked by the Java compiler
     // On the other hand, the jOOQ Record types become a bit unwieldy with more than a few columns
     // Moreover, we lose type-safe with over 22 columns
-    // And the jOOQ Record types with more than a few columns are not attractive to write out
-    // And that means that type-safe reuse of query parts is not very practical
-    // This is a pity in this class, where many queries are so much alike
+    // Yet we can combine columns into a "row", like we do below to avoid unwieldy types while reusing query parts
 
     private record CategoryRow(@Nullable Integer id, String name) {
 
@@ -127,53 +127,10 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findAllFilms() {
-        // Creating an alias for the Language table, to be used for the original language join
-        Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
-
-        return dsl
-                .select(
-                        FILM.FILM_ID,
-                        FILM.TITLE,
-                        FILM.DESCRIPTION,
-                        FILM.RELEASE_YEAR,
-                        trim(LANGUAGE.NAME),
-                        trim(originalLanguage.NAME),
-                        multiset(
-                                select(
-                                        CATEGORY.CATEGORY_ID,
-                                        CATEGORY.NAME
-                                ).from(CATEGORY)
-                                        .join(FILM_CATEGORY)
-                                        .on(CATEGORY.CATEGORY_ID.eq(FILM_CATEGORY.CATEGORY_ID))
-                                        .where(FILM_CATEGORY.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(CategoryRow::new))),
-                        multiset(
-                                select(
-                                        ACTOR.ACTOR_ID,
-                                        ACTOR.FIRST_NAME,
-                                        ACTOR.LAST_NAME
-                                )
-                                        .from(ACTOR)
-                                        .join(FILM_ACTOR)
-                                        .on(ACTOR.ACTOR_ID.eq(FILM_ACTOR.ACTOR_ID))
-                                        .where(FILM_ACTOR.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(ActorRow::new))),
-                        FILM.RENTAL_DURATION,
-                        FILM.RENTAL_RATE,
-                        FILM.LENGTH,
-                        FILM.REPLACEMENT_COST,
-                        FILM.RATING,
-                        FILM.SPECIAL_FEATURES
-                )
-                .from(FILM)
-                .leftJoin(LANGUAGE)
-                .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
-                .leftJoin(originalLanguage)
-                .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID))
+        return getBaseFilmQuery()
                 .fetchStream()
-                .map(Records.mapping(FilmRow::new))
-                .filter(Objects::nonNull)
                 .distinct()
+                .map(Record1::value1)
                 .map(FilmRow::toModel)
                 .collect(ImmutableList.toImmutableList());
     }
@@ -181,54 +138,11 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByLanguage(String language) {
-        // Creating an alias for the Language table, to be used for the original language join
-        Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
-
-        return dsl
-                .select(
-                        FILM.FILM_ID,
-                        FILM.TITLE,
-                        FILM.DESCRIPTION,
-                        FILM.RELEASE_YEAR,
-                        trim(LANGUAGE.NAME),
-                        trim(originalLanguage.NAME),
-                        multiset(
-                                select(
-                                        CATEGORY.CATEGORY_ID,
-                                        CATEGORY.NAME
-                                ).from(CATEGORY)
-                                        .join(FILM_CATEGORY)
-                                        .on(CATEGORY.CATEGORY_ID.eq(FILM_CATEGORY.CATEGORY_ID))
-                                        .where(FILM_CATEGORY.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(CategoryRow::new))),
-                        multiset(
-                                select(
-                                        ACTOR.ACTOR_ID,
-                                        ACTOR.FIRST_NAME,
-                                        ACTOR.LAST_NAME
-                                )
-                                        .from(ACTOR)
-                                        .join(FILM_ACTOR)
-                                        .on(ACTOR.ACTOR_ID.eq(FILM_ACTOR.ACTOR_ID))
-                                        .where(FILM_ACTOR.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(ActorRow::new))),
-                        FILM.RENTAL_DURATION,
-                        FILM.RENTAL_RATE,
-                        FILM.LENGTH,
-                        FILM.REPLACEMENT_COST,
-                        FILM.RATING,
-                        FILM.SPECIAL_FEATURES
-                )
-                .from(FILM)
-                .leftJoin(LANGUAGE)
-                .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
-                .leftJoin(originalLanguage)
-                .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID))
+        return getBaseFilmQuery()
                 .where(upper(trim(LANGUAGE.NAME)).eq(language.toUpperCase()))
                 .fetchStream()
-                .map(Records.mapping(FilmRow::new))
-                .filter(Objects::nonNull)
                 .distinct()
+                .map(Record1::value1)
                 .map(FilmRow::toModel)
                 .collect(ImmutableList.toImmutableList());
     }
@@ -242,58 +156,15 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories) {
-        // Creating an alias for the Language table, to be used for the original language join
-        Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
-
-        return dsl
-                .select(
-                        FILM.FILM_ID,
-                        FILM.TITLE,
-                        FILM.DESCRIPTION,
-                        FILM.RELEASE_YEAR,
-                        trim(LANGUAGE.NAME),
-                        trim(originalLanguage.NAME),
-                        multiset(
-                                select(
-                                        CATEGORY.CATEGORY_ID,
-                                        CATEGORY.NAME
-                                ).from(CATEGORY)
-                                        .join(FILM_CATEGORY)
-                                        .on(CATEGORY.CATEGORY_ID.eq(FILM_CATEGORY.CATEGORY_ID))
-                                        .where(FILM_CATEGORY.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(CategoryRow::new))),
-                        multiset(
-                                select(
-                                        ACTOR.ACTOR_ID,
-                                        ACTOR.FIRST_NAME,
-                                        ACTOR.LAST_NAME
-                                )
-                                        .from(ACTOR)
-                                        .join(FILM_ACTOR)
-                                        .on(ACTOR.ACTOR_ID.eq(FILM_ACTOR.ACTOR_ID))
-                                        .where(FILM_ACTOR.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(ActorRow::new))),
-                        FILM.RENTAL_DURATION,
-                        FILM.RENTAL_RATE,
-                        FILM.LENGTH,
-                        FILM.REPLACEMENT_COST,
-                        FILM.RATING,
-                        FILM.SPECIAL_FEATURES
-                )
-                .from(FILM)
-                .leftJoin(LANGUAGE)
-                .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
-                .leftJoin(originalLanguage)
-                .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID))
+        return getBaseFilmQuery()
                 .leftJoin(FILM_CATEGORY)
                 .on(FILM.FILM_ID.eq(FILM_CATEGORY.FILM_ID))
                 .leftJoin(CATEGORY)
                 .on(FILM_CATEGORY.CATEGORY_ID.eq(CATEGORY.CATEGORY_ID))
                 .where(upper(CATEGORY.NAME).in(categories.stream().map(String::toUpperCase).toList()))
                 .fetchStream()
-                .map(Records.mapping(FilmRow::new))
-                .filter(Objects::nonNull)
                 .distinct()
+                .map(Record1::value1)
                 .map(FilmRow::toModel)
                 .collect(ImmutableList.toImmutableList());
     }
@@ -301,49 +172,7 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByActor(String firstName, String lastName) {
-        // Creating an alias for the Language table, to be used for the original language join
-        Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
-
-        return dsl
-                .select(
-                        FILM.FILM_ID,
-                        FILM.TITLE,
-                        FILM.DESCRIPTION,
-                        FILM.RELEASE_YEAR,
-                        trim(LANGUAGE.NAME),
-                        trim(originalLanguage.NAME),
-                        multiset(
-                                select(
-                                        CATEGORY.CATEGORY_ID,
-                                        CATEGORY.NAME
-                                ).from(CATEGORY)
-                                        .join(FILM_CATEGORY)
-                                        .on(CATEGORY.CATEGORY_ID.eq(FILM_CATEGORY.CATEGORY_ID))
-                                        .where(FILM_CATEGORY.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(CategoryRow::new))),
-                        multiset(
-                                select(
-                                        ACTOR.ACTOR_ID,
-                                        ACTOR.FIRST_NAME,
-                                        ACTOR.LAST_NAME
-                                )
-                                        .from(ACTOR)
-                                        .join(FILM_ACTOR)
-                                        .on(ACTOR.ACTOR_ID.eq(FILM_ACTOR.ACTOR_ID))
-                                        .where(FILM_ACTOR.FILM_ID.eq(FILM.FILM_ID))
-                        ).convertFrom(r -> r.map(Records.mapping(ActorRow::new))),
-                        FILM.RENTAL_DURATION,
-                        FILM.RENTAL_RATE,
-                        FILM.LENGTH,
-                        FILM.REPLACEMENT_COST,
-                        FILM.RATING,
-                        FILM.SPECIAL_FEATURES
-                )
-                .from(FILM)
-                .leftJoin(LANGUAGE)
-                .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
-                .leftJoin(originalLanguage)
-                .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID))
+        return getBaseFilmQuery()
                 .leftJoin(FILM_ACTOR)
                 .on(FILM.FILM_ID.eq(FILM_ACTOR.FILM_ID))
                 .leftJoin(ACTOR)
@@ -353,9 +182,8 @@ public class JooqFilmService implements FilmService {
                                 .and(upper(ACTOR.LAST_NAME).eq(lastName.toUpperCase()))
                 )
                 .fetchStream()
-                .map(Records.mapping(FilmRow::new))
-                .filter(Objects::nonNull)
                 .distinct()
+                .map(Record1::value1)
                 .map(FilmRow::toModel)
                 .collect(ImmutableList.toImmutableList());
     }
@@ -371,5 +199,53 @@ public class JooqFilmService implements FilmService {
                 .filter(Objects::nonNull)
                 .map(CategoryRow::name)
                 .collect(ImmutableSet.toImmutableSet());
+    }
+
+    private SelectJoinStep<Record1<FilmRow>> getBaseFilmQuery() {
+        // Creating an alias for the Language table, to be used for the original language join
+        Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
+
+        return dsl
+                .select(
+                        row(
+                                FILM.FILM_ID,
+                                FILM.TITLE,
+                                FILM.DESCRIPTION,
+                                FILM.RELEASE_YEAR,
+                                trim(LANGUAGE.NAME),
+                                trim(originalLanguage.NAME),
+                                multiset(
+                                        select(
+                                                CATEGORY.CATEGORY_ID,
+                                                CATEGORY.NAME
+                                        ).from(CATEGORY)
+                                                .join(FILM_CATEGORY)
+                                                .on(CATEGORY.CATEGORY_ID.eq(FILM_CATEGORY.CATEGORY_ID))
+                                                .where(FILM_CATEGORY.FILM_ID.eq(FILM.FILM_ID))
+                                ).convertFrom(r -> r.map(Records.mapping(CategoryRow::new))),
+                                multiset(
+                                        select(
+                                                ACTOR.ACTOR_ID,
+                                                ACTOR.FIRST_NAME,
+                                                ACTOR.LAST_NAME
+                                        )
+                                                .from(ACTOR)
+                                                .join(FILM_ACTOR)
+                                                .on(ACTOR.ACTOR_ID.eq(FILM_ACTOR.ACTOR_ID))
+                                                .where(FILM_ACTOR.FILM_ID.eq(FILM.FILM_ID))
+                                ).convertFrom(r -> r.map(Records.mapping(ActorRow::new))),
+                                FILM.RENTAL_DURATION,
+                                FILM.RENTAL_RATE,
+                                FILM.LENGTH,
+                                FILM.REPLACEMENT_COST,
+                                FILM.RATING,
+                                FILM.SPECIAL_FEATURES
+                        ).mapping(FilmRow::new)
+                )
+                .from(FILM)
+                .leftJoin(LANGUAGE)
+                .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
+                .leftJoin(originalLanguage)
+                .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID));
     }
 }
