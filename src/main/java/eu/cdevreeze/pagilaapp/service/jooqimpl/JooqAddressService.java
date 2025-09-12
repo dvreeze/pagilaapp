@@ -35,7 +35,7 @@ import static eu.cdevreeze.pagilaapp.jooq.tables.Country.COUNTRY;
 import static org.jooq.impl.DSL.row;
 
 /**
- * Default AddressService implementation.
+ * jOOQ AddressService implementation.
  *
  * @author Chris de Vreeze
  */
