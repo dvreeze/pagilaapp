@@ -24,10 +24,10 @@ import eu.cdevreeze.pagilaapp.model.Actor;
 import eu.cdevreeze.pagilaapp.model.Category;
 import eu.cdevreeze.pagilaapp.model.Film;
 import eu.cdevreeze.pagilaapp.service.FilmService;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Record1;
 import org.jooq.Records;
-import org.jooq.SelectJoinStep;
+import org.jooq.impl.DSL;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
@@ -45,6 +45,9 @@ import static org.jooq.impl.DSL.*;
 
 /**
  * jOOQ FilmService implementation.
+ * <p>
+ * See <a href="https://blog.jooq.org/create-empty-optional-sql-clauses-with-jooq/">create empty optional SQL clauses with jOOQ</a>
+ * for the approach followed to reuse queries in a way that works well in jOOQ.
  *
  * @author Chris de Vreeze
  */
@@ -56,7 +59,7 @@ public class JooqFilmService implements FilmService {
     // We just write SQL, be it in Java, checked by the Java compiler
     // On the other hand, the jOOQ Record types become a bit unwieldy with more than a few columns
     // Moreover, we lose type-safe with over 22 columns
-    // Yet we can combine columns into a "row", like we do below to avoid unwieldy types while reusing query parts
+    // Yet we can combine columns into a "row" to mitigate this, should we need explicit jOOQ Record (sub)types
 
     private record CategoryRow(@Nullable Integer id, String name) {
 
@@ -129,12 +132,7 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findAllFilms() {
-        return getBaseFilmQuery()
-                .fetchStream()
-                .distinct()
-                .map(Record1::value1)
-                .map(FilmRow::toModel)
-                .collect(ImmutableList.toImmutableList());
+        return findFilms(DSL.noCondition());
     }
 
     @Override
@@ -143,13 +141,9 @@ public class JooqFilmService implements FilmService {
         // Note that we do not have to trim the fixed length "LANGUAGE.NAME" column
         // That's because we configured jOOQ to trim those columns
 
-        return getBaseFilmQuery()
-                .where(upper(LANGUAGE.NAME).eq(language.toUpperCase()))
-                .fetchStream()
-                .distinct()
-                .map(Record1::value1)
-                .map(FilmRow::toModel)
-                .collect(ImmutableList.toImmutableList());
+        return findFilms(
+                upper(LANGUAGE.NAME).eq(language.toUpperCase())
+        );
     }
 
     @Override
@@ -161,36 +155,18 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories) {
-        return getBaseFilmQuery()
-                .leftJoin(FILM_CATEGORY)
-                .on(FILM.FILM_ID.eq(FILM_CATEGORY.FILM_ID))
-                .leftJoin(CATEGORY)
-                .on(FILM_CATEGORY.CATEGORY_ID.eq(CATEGORY.CATEGORY_ID))
-                .where(upper(CATEGORY.NAME).in(categories.stream().map(String::toUpperCase).toList()))
-                .fetchStream()
-                .distinct()
-                .map(Record1::value1)
-                .map(FilmRow::toModel)
-                .collect(ImmutableList.toImmutableList());
+        return findFilms(
+                upper(CATEGORY.NAME).in(categories.stream().map(String::toUpperCase).toList())
+        );
     }
 
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByActor(String firstName, String lastName) {
-        return getBaseFilmQuery()
-                .leftJoin(FILM_ACTOR)
-                .on(FILM.FILM_ID.eq(FILM_ACTOR.FILM_ID))
-                .leftJoin(ACTOR)
-                .on(FILM_ACTOR.ACTOR_ID.eq(ACTOR.ACTOR_ID))
-                .where(
-                        upper(ACTOR.FIRST_NAME).eq(firstName.toUpperCase())
-                                .and(upper(ACTOR.LAST_NAME).eq(lastName.toUpperCase()))
-                )
-                .fetchStream()
-                .distinct()
-                .map(Record1::value1)
-                .map(FilmRow::toModel)
-                .collect(ImmutableList.toImmutableList());
+        return findFilms(
+                upper(ACTOR.FIRST_NAME).eq(firstName.toUpperCase())
+                        .and(upper(ACTOR.LAST_NAME).eq(lastName.toUpperCase()))
+        );
     }
 
     @Override
@@ -206,7 +182,7 @@ public class JooqFilmService implements FilmService {
                 .collect(ImmutableSet.toImmutableSet());
     }
 
-    private SelectJoinStep<Record1<FilmRow>> getBaseFilmQuery() {
+    private ImmutableList<Film> findFilms(Condition whereCondition) {
         // Creating an alias for the Language table, to be used for the original language join
         Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
 
@@ -214,47 +190,62 @@ public class JooqFilmService implements FilmService {
         // That's because we configured jOOQ to trim those columns
         // That works inside "where" clauses, but I do not see such trimming in the "select" clause
 
+        // TODO Improve: not all extra joins are needed all the time!
+
         return dsl
                 .selectDistinct(
-                        row(
-                                FILM.FILM_ID,
-                                FILM.TITLE,
-                                FILM.DESCRIPTION,
-                                FILM.RELEASE_YEAR,
-                                rtrim(LANGUAGE.NAME),
-                                rtrim(originalLanguage.NAME),
-                                multiset(
-                                        select(
-                                                CATEGORY.CATEGORY_ID,
-                                                CATEGORY.NAME
-                                        ).from(CATEGORY)
-                                                .join(FILM_CATEGORY)
-                                                .on(CATEGORY.CATEGORY_ID.eq(FILM_CATEGORY.CATEGORY_ID))
-                                                .where(FILM_CATEGORY.FILM_ID.eq(FILM.FILM_ID))
-                                ).convertFrom(r -> r.map(Records.mapping(CategoryRow::new))),
-                                multiset(
-                                        select(
-                                                ACTOR.ACTOR_ID,
-                                                ACTOR.FIRST_NAME,
-                                                ACTOR.LAST_NAME
-                                        )
-                                                .from(ACTOR)
-                                                .join(FILM_ACTOR)
-                                                .on(ACTOR.ACTOR_ID.eq(FILM_ACTOR.ACTOR_ID))
-                                                .where(FILM_ACTOR.FILM_ID.eq(FILM.FILM_ID))
-                                ).convertFrom(r -> r.map(Records.mapping(ActorRow::new))),
-                                FILM.RENTAL_DURATION,
-                                FILM.RENTAL_RATE,
-                                FILM.LENGTH,
-                                FILM.REPLACEMENT_COST,
-                                FILM.RATING,
-                                FILM.SPECIAL_FEATURES
-                        ).mapping(FilmRow::new)
+                        FILM.FILM_ID,
+                        FILM.TITLE,
+                        FILM.DESCRIPTION,
+                        FILM.RELEASE_YEAR,
+                        rtrim(LANGUAGE.NAME),
+                        rtrim(originalLanguage.NAME),
+                        multiset(
+                                select(
+                                        CATEGORY.CATEGORY_ID,
+                                        CATEGORY.NAME
+                                ).from(CATEGORY)
+                                        .join(FILM_CATEGORY)
+                                        .on(CATEGORY.CATEGORY_ID.eq(FILM_CATEGORY.CATEGORY_ID))
+                                        .where(FILM_CATEGORY.FILM_ID.eq(FILM.FILM_ID))
+                        ).convertFrom(r -> r.map(Records.mapping(CategoryRow::new))),
+                        multiset(
+                                select(
+                                        ACTOR.ACTOR_ID,
+                                        ACTOR.FIRST_NAME,
+                                        ACTOR.LAST_NAME
+                                )
+                                        .from(ACTOR)
+                                        .join(FILM_ACTOR)
+                                        .on(ACTOR.ACTOR_ID.eq(FILM_ACTOR.ACTOR_ID))
+                                        .where(FILM_ACTOR.FILM_ID.eq(FILM.FILM_ID))
+                        ).convertFrom(r -> r.map(Records.mapping(ActorRow::new))),
+                        FILM.RENTAL_DURATION,
+                        FILM.RENTAL_RATE,
+                        FILM.LENGTH,
+                        FILM.REPLACEMENT_COST,
+                        FILM.RATING,
+                        FILM.SPECIAL_FEATURES
                 )
                 .from(FILM)
                 .leftJoin(LANGUAGE)
                 .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
                 .leftJoin(originalLanguage)
-                .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID));
+                .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID))
+                .leftJoin(FILM_CATEGORY)
+                .on(FILM.FILM_ID.eq(FILM_CATEGORY.FILM_ID))
+                .leftJoin(CATEGORY)
+                .on(FILM_CATEGORY.CATEGORY_ID.eq(CATEGORY.CATEGORY_ID))
+                .leftJoin(FILM_ACTOR)
+                .on(FILM.FILM_ID.eq(FILM_ACTOR.FILM_ID))
+                .leftJoin(ACTOR)
+                .on(FILM_ACTOR.ACTOR_ID.eq(ACTOR.ACTOR_ID))
+                .where(whereCondition)
+                .fetchStream()
+                .map(Records.mapping(FilmRow::new))
+                .distinct()
+                .filter(Objects::nonNull)
+                .map(FilmRow::toModel)
+                .collect(ImmutableList.toImmutableList());
     }
 }
