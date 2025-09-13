@@ -23,6 +23,7 @@ import eu.cdevreeze.pagilaapp.service.AddressService;
 import org.jooq.DSLContext;
 import org.jooq.Records;
 import org.jspecify.annotations.Nullable;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -40,6 +41,7 @@ import static org.jooq.impl.DSL.row;
  * @author Chris de Vreeze
  */
 @Service
+@ConditionalOnBooleanProperty(name = "useJooq")
 public class JooqAddressService implements AddressService {
 
     private record CityRow(

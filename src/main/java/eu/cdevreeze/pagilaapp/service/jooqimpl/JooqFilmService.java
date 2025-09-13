@@ -29,6 +29,7 @@ import org.jooq.Record1;
 import org.jooq.Records;
 import org.jooq.SelectJoinStep;
 import org.jspecify.annotations.Nullable;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -48,6 +49,7 @@ import static org.jooq.impl.DSL.*;
  * @author Chris de Vreeze
  */
 @Service
+@ConditionalOnBooleanProperty(name = "useJooq")
 public class JooqFilmService implements FilmService {
 
     // The type-safety offered by jOOQ is absolutely great
