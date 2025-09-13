@@ -140,8 +140,11 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByLanguage(String language) {
+        // Note that we do not have to trim the fixed length "LANGUAGE.NAME" column
+        // That's because we configured jOOQ to trim those columns
+
         return getBaseFilmQuery()
-                .where(upper(trim(LANGUAGE.NAME)).eq(language.toUpperCase()))
+                .where(upper(LANGUAGE.NAME).eq(language.toUpperCase()))
                 .fetchStream()
                 .distinct()
                 .map(Record1::value1)
@@ -207,6 +210,10 @@ public class JooqFilmService implements FilmService {
         // Creating an alias for the Language table, to be used for the original language join
         Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
 
+        // Note that in theory we do not have to trim the fixed length "LANGUAGE.NAME" column
+        // That's because we configured jOOQ to trim those columns
+        // That works inside "where" clauses, but I do not see such trimming in the "select" clause
+
         return dsl
                 .select(
                         row(
@@ -214,8 +221,8 @@ public class JooqFilmService implements FilmService {
                                 FILM.TITLE,
                                 FILM.DESCRIPTION,
                                 FILM.RELEASE_YEAR,
-                                trim(LANGUAGE.NAME),
-                                trim(originalLanguage.NAME),
+                                rtrim(LANGUAGE.NAME),
+                                rtrim(originalLanguage.NAME),
                                 multiset(
                                         select(
                                                 CATEGORY.CATEGORY_ID,
