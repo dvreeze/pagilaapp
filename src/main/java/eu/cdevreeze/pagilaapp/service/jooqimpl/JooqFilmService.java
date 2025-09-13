@@ -215,7 +215,7 @@ public class JooqFilmService implements FilmService {
         // That works inside "where" clauses, but I do not see such trimming in the "select" clause
 
         return dsl
-                .select(
+                .selectDistinct(
                         row(
                                 FILM.FILM_ID,
                                 FILM.TITLE,

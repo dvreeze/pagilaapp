@@ -92,7 +92,7 @@ public class JooqAddressService implements AddressService {
     @Transactional(readOnly = true)
     public ImmutableList<Address> findAllAddresses() {
         return dsl
-                .select(
+                .selectDistinct(
                         ADDRESS.ADDRESS_ID,
                         ADDRESS.ADDRESS_,
                         ADDRESS.ADDRESS2,

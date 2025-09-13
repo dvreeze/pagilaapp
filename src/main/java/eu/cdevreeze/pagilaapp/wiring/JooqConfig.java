@@ -29,6 +29,12 @@ import org.springframework.context.annotation.Configuration;
  * <p>
  * See <a href="https://www.jooq.org/doc/latest/manual/sql-building/dsl-context/custom-settings/settings-fetching-trimmed-strings/">jOOQ fetchTrimmedCharValues setting</a>
  * for the "fetchTrimmedCharValues" setting.
+ * <p>
+ * See <a href="https://www.jooq.org/doc/latest/manual/sql-building/dsl-context/custom-settings/settings-in-list-padding/">IN list padding</a>
+ * for "IN list padding", to reduce the number of SQL query strings.
+ * <p>
+ * See <a href="https://www.jooq.org/doc/latest/manual/sql-building/dsl-context/custom-settings/settings-map-jpa/">map JPA annotations</a>
+ * for mapping of JPA annotations.
  *
  * @author Chris de Vreeze
  */
@@ -37,6 +43,11 @@ public class JooqConfig {
 
     @Bean
     public DefaultConfigurationCustomizer configurationCustomizer() {
-        return (DefaultConfiguration c) -> c.settings().withFetchTrimmedCharValues(true);
+        return (DefaultConfiguration c) -> c.settings()
+                .withFetchTrimmedCharValues(true)
+                .withInListPadding(true)
+                .withInListPadBase(4)
+                .withMapJPAAnnotations(false)
+                .withRenderFormatted(true);
     }
 }
