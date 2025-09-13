@@ -30,6 +30,7 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.Subgraph;
 import jakarta.persistence.criteria.*;
 import org.hibernate.internal.SessionImpl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -56,8 +57,14 @@ public class DefaultFilmService implements FilmService {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    public DefaultFilmService(EntityManager entityManager) {
+    private final int numberOfJpaQueriesToGetAllFilms;
+
+    public DefaultFilmService(
+            EntityManager entityManager,
+            @Value("${numberOfJpaQueriesToGetAllFilms}") int numberOfJpaQueriesToGetAllFilms
+    ) {
         this.entityManager = entityManager;
+        this.numberOfJpaQueriesToGetAllFilms = numberOfJpaQueriesToGetAllFilms;
     }
 
     @Override
@@ -71,7 +78,7 @@ public class DefaultFilmService implements FilmService {
 
         Set<String> categories = findAllFilmCategories();
 
-        int queryCount = 12;
+        int queryCount = numberOfJpaQueriesToGetAllFilms;
         Map<Integer, List<String>> categoryGroups = categories
                 .stream()
                 .collect(Collectors.groupingBy(cat -> cat.hashCode() % queryCount));
