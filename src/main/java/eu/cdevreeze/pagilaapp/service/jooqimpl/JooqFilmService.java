@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.pagilaapp.jooq.enums.MpaaRating;
@@ -27,7 +28,6 @@ import eu.cdevreeze.pagilaapp.service.FilmService;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Records;
-import org.jooq.impl.DSL;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
@@ -132,7 +132,7 @@ public class JooqFilmService implements FilmService {
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findAllFilms() {
-        return findFilms(DSL.noCondition());
+        return findFilms(false, false, noCondition());
     }
 
     @Override
@@ -142,6 +142,8 @@ public class JooqFilmService implements FilmService {
         // That's because we configured jOOQ to trim those columns
 
         return findFilms(
+                false,
+                false,
                 upper(LANGUAGE.NAME).eq(language.toUpperCase())
         );
     }
@@ -156,6 +158,8 @@ public class JooqFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories) {
         return findFilms(
+                true,
+                false,
                 upper(CATEGORY.NAME).in(categories.stream().map(String::toUpperCase).toList())
         );
     }
@@ -164,6 +168,8 @@ public class JooqFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByActor(String firstName, String lastName) {
         return findFilms(
+                false,
+                true,
                 upper(ACTOR.FIRST_NAME).eq(firstName.toUpperCase())
                         .and(upper(ACTOR.LAST_NAME).eq(lastName.toUpperCase()))
         );
@@ -174,15 +180,17 @@ public class JooqFilmService implements FilmService {
     public ImmutableSet<String> findAllFilmCategories() {
         return dsl.select(CATEGORY.CATEGORY_ID, CATEGORY.NAME)
                 .from(CATEGORY)
+                .orderBy(CATEGORY.CATEGORY_ID)
                 .fetchStream()
                 .map(Records.mapping(CategoryRow::new))
-                .distinct()
                 .filter(Objects::nonNull)
                 .map(CategoryRow::name)
                 .collect(ImmutableSet.toImmutableSet());
     }
 
-    private ImmutableList<Film> findFilms(Condition whereCondition) {
+    private ImmutableList<Film> findFilms(boolean joinCategories, boolean joinActors, Condition whereCondition) {
+        Preconditions.checkArgument(!joinCategories || !joinActors);
+
         // Creating an alias for the Language table, to be used for the original language join
         Language originalLanguage = LANGUAGE.as("ORIGINAL_LANGUAGE");
 
@@ -190,10 +198,8 @@ public class JooqFilmService implements FilmService {
         // That's because we configured jOOQ to trim those columns
         // That works inside "where" clauses, but I do not see such trimming in the "select" clause
 
-        // TODO Improve: not all extra joins are needed all the time!
-
         return dsl
-                .select(
+                .selectDistinct(
                         FILM.FILM_ID,
                         FILM.TITLE,
                         FILM.DESCRIPTION,
@@ -227,23 +233,29 @@ public class JooqFilmService implements FilmService {
                         FILM.RATING,
                         FILM.SPECIAL_FEATURES
                 )
-                .from(FILM)
+                .from(
+                        joinCategories ?
+                                FILM
+                                        .leftJoin(FILM_CATEGORY)
+                                        .on(FILM.FILM_ID.eq(FILM_CATEGORY.FILM_ID))
+                                        .leftJoin(CATEGORY)
+                                        .on(FILM_CATEGORY.CATEGORY_ID.eq(CATEGORY.CATEGORY_ID)) :
+                                joinActors ?
+                                        FILM
+                                                .leftJoin(FILM_ACTOR)
+                                                .on(FILM.FILM_ID.eq(FILM_ACTOR.FILM_ID))
+                                                .leftJoin(ACTOR)
+                                                .on(FILM_ACTOR.ACTOR_ID.eq(ACTOR.ACTOR_ID)) :
+                                        FILM
+                )
                 .leftJoin(LANGUAGE)
                 .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
                 .leftJoin(originalLanguage)
                 .on(FILM.ORIGINAL_LANGUAGE_ID.eq(originalLanguage.LANGUAGE_ID))
-                .leftJoin(FILM_CATEGORY)
-                .on(FILM.FILM_ID.eq(FILM_CATEGORY.FILM_ID))
-                .leftJoin(CATEGORY)
-                .on(FILM_CATEGORY.CATEGORY_ID.eq(CATEGORY.CATEGORY_ID))
-                .leftJoin(FILM_ACTOR)
-                .on(FILM.FILM_ID.eq(FILM_ACTOR.FILM_ID))
-                .leftJoin(ACTOR)
-                .on(FILM_ACTOR.ACTOR_ID.eq(ACTOR.ACTOR_ID))
                 .where(whereCondition)
+                .orderBy(FILM.FILM_ID)
                 .fetchStream()
                 .map(Records.mapping(FilmRow::new))
-                .distinct()
                 .filter(Objects::nonNull)
                 .map(FilmRow::toModel)
                 .collect(ImmutableList.toImmutableList());
