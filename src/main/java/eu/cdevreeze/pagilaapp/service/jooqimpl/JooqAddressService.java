@@ -92,7 +92,7 @@ public class JooqAddressService implements AddressService {
     @Transactional(readOnly = true)
     public ImmutableList<Address> findAllAddresses() {
         return dsl
-                .selectDistinct(
+                .select(
                         ADDRESS.ADDRESS_ID,
                         ADDRESS.ADDRESS_,
                         ADDRESS.ADDRESS2,
@@ -113,6 +113,7 @@ public class JooqAddressService implements AddressService {
                 .fetchStream()
                 .map(Records.mapping(AddressRow::new))
                 .filter(Objects::nonNull)
+                .distinct()
                 .map(AddressRow::toModel)
                 .collect(ImmutableList.toImmutableList());
     }

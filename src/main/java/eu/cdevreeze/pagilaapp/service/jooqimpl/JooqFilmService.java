@@ -193,7 +193,7 @@ public class JooqFilmService implements FilmService {
         // TODO Improve: not all extra joins are needed all the time!
 
         return dsl
-                .selectDistinct(
+                .select(
                         FILM.FILM_ID,
                         FILM.TITLE,
                         FILM.DESCRIPTION,
