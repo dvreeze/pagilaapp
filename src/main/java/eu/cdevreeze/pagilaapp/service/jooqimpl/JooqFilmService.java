@@ -28,6 +28,7 @@ import eu.cdevreeze.pagilaapp.service.FilmService;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Records;
+import org.jooq.Table;
 import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
@@ -233,21 +234,7 @@ public class JooqFilmService implements FilmService {
                         FILM.RATING,
                         FILM.SPECIAL_FEATURES
                 )
-                .from(
-                        joinCategories ?
-                                FILM
-                                        .leftJoin(FILM_CATEGORY)
-                                        .on(FILM.FILM_ID.eq(FILM_CATEGORY.FILM_ID))
-                                        .leftJoin(CATEGORY)
-                                        .on(FILM_CATEGORY.CATEGORY_ID.eq(CATEGORY.CATEGORY_ID)) :
-                                joinActors ?
-                                        FILM
-                                                .leftJoin(FILM_ACTOR)
-                                                .on(FILM.FILM_ID.eq(FILM_ACTOR.FILM_ID))
-                                                .leftJoin(ACTOR)
-                                                .on(FILM_ACTOR.ACTOR_ID.eq(ACTOR.ACTOR_ID)) :
-                                        FILM
-                )
+                .from(createFrom(joinCategories, joinActors))
                 .leftJoin(LANGUAGE)
                 .on(FILM.LANGUAGE_ID.eq(LANGUAGE.LANGUAGE_ID))
                 .leftJoin(originalLanguage)
@@ -259,5 +246,23 @@ public class JooqFilmService implements FilmService {
                 .filter(Objects::nonNull)
                 .map(FilmRow::toModel)
                 .collect(ImmutableList.toImmutableList());
+    }
+
+    private Table<?> createFrom(boolean joinCategories, boolean joinActors) {
+        Preconditions.checkArgument(!joinCategories || !joinActors);
+
+        return joinCategories ?
+                FILM
+                        .leftJoin(FILM_CATEGORY)
+                        .on(FILM.FILM_ID.eq(FILM_CATEGORY.FILM_ID))
+                        .leftJoin(CATEGORY)
+                        .on(FILM_CATEGORY.CATEGORY_ID.eq(CATEGORY.CATEGORY_ID)) :
+                joinActors ?
+                        FILM
+                                .leftJoin(FILM_ACTOR)
+                                .on(FILM.FILM_ID.eq(FILM_ACTOR.FILM_ID))
+                                .leftJoin(ACTOR)
+                                .on(FILM_ACTOR.ACTOR_ID.eq(ACTOR.ACTOR_ID)) :
+                        FILM;
     }
 }
