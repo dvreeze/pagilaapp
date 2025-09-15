@@ -17,63 +17,84 @@
 package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
 import com.google.common.collect.ImmutableList;
-import eu.cdevreeze.pagilaapp.model.Address;
-import eu.cdevreeze.pagilaapp.service.AddressService;
+import eu.cdevreeze.pagilaapp.model.Store;
+import eu.cdevreeze.pagilaapp.service.StoreService;
 import org.jooq.DSLContext;
 import org.jooq.Records;
+import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
+import java.util.Optional;
 
+import static eu.cdevreeze.pagilaapp.jooq.Tables.STORE;
 import static eu.cdevreeze.pagilaapp.jooq.tables.Address.ADDRESS;
 import static eu.cdevreeze.pagilaapp.jooq.tables.City.CITY;
 import static eu.cdevreeze.pagilaapp.jooq.tables.Country.COUNTRY;
 import static org.jooq.impl.DSL.row;
 
 /**
- * jOOQ AddressService implementation.
+ * jOOQ StoreService implementation.
  *
  * @author Chris de Vreeze
  */
 @Service
 @ConditionalOnBooleanProperty(name = "useJooq")
-public class JooqAddressService implements AddressService {
+public class JooqStoreService implements StoreService {
+
+    private record StoreRow(
+            @Nullable Integer id,
+            ResultRows.AddressRow address
+    ) {
+
+        public Store toModel() {
+            return new Store(
+                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    address.toModel()
+            );
+        }
+    }
 
     private final DSLContext dsl;
 
-    public JooqAddressService(DSLContext dsl) {
+    public JooqStoreService(DSLContext dsl) {
         this.dsl = dsl;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ImmutableList<Address> findAllAddresses() {
+    public ImmutableList<Store> findAllStores() {
         return dsl
                 .selectDistinct(
-                        ADDRESS.ADDRESS_ID,
-                        ADDRESS.ADDRESS_,
-                        ADDRESS.ADDRESS2,
-                        ADDRESS.DISTRICT,
+                        STORE.STORE_ID,
                         row(
-                                ADDRESS.CITY_ID,
-                                CITY.CITY_,
-                                COUNTRY.COUNTRY_
-                        ).convertFrom(Records.mapping(ResultRows.CityRow::new)),
-                        ADDRESS.POSTAL_CODE,
-                        ADDRESS.PHONE
+                                ADDRESS.ADDRESS_ID,
+                                ADDRESS.ADDRESS_,
+                                ADDRESS.ADDRESS2,
+                                ADDRESS.DISTRICT,
+                                row(
+                                        ADDRESS.CITY_ID,
+                                        CITY.CITY_,
+                                        COUNTRY.COUNTRY_
+                                ).convertFrom(Records.mapping(ResultRows.CityRow::new)),
+                                ADDRESS.POSTAL_CODE,
+                                ADDRESS.PHONE
+                        ).convertFrom(Records.mapping(ResultRows.AddressRow::new))
                 )
-                .from(ADDRESS)
+                .from(STORE)
+                .leftJoin(ADDRESS)
+                .on(STORE.ADDRESS_ID.eq(ADDRESS.ADDRESS_ID))
                 .leftJoin(CITY)
                 .on(ADDRESS.CITY_ID.eq(CITY.CITY_ID))
                 .leftJoin(COUNTRY)
                 .on(CITY.COUNTRY_ID.eq(COUNTRY.COUNTRY_ID))
-                .orderBy(ADDRESS.ADDRESS_ID)
+                .orderBy(STORE.STORE_ID)
                 .fetchStream()
-                .map(Records.mapping(ResultRows.AddressRow::new))
+                .map(Records.mapping(StoreRow::new))
                 .filter(Objects::nonNull)
-                .map(ResultRows.AddressRow::toModel)
+                .map(StoreRow::toModel)
                 .collect(ImmutableList.toImmutableList());
     }
 }
