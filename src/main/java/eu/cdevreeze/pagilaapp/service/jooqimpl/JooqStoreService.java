@@ -21,13 +21,11 @@ import eu.cdevreeze.pagilaapp.model.Store;
 import eu.cdevreeze.pagilaapp.service.StoreService;
 import org.jooq.DSLContext;
 import org.jooq.Records;
-import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Objects;
-import java.util.Optional;
 
 import static eu.cdevreeze.pagilaapp.jooq.Tables.STORE;
 import static eu.cdevreeze.pagilaapp.jooq.tables.Address.ADDRESS;
@@ -43,19 +41,6 @@ import static org.jooq.impl.DSL.row;
 @Service
 @ConditionalOnBooleanProperty(name = "useJooq")
 public class JooqStoreService implements StoreService {
-
-    private record StoreRow(
-            @Nullable Integer id,
-            ResultRows.AddressRow address
-    ) {
-
-        public Store toModel() {
-            return new Store(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
-                    address.toModel()
-            );
-        }
-    }
 
     private final DSLContext dsl;
 
@@ -92,9 +77,9 @@ public class JooqStoreService implements StoreService {
                 .on(CITY.COUNTRY_ID.eq(COUNTRY.COUNTRY_ID))
                 .orderBy(STORE.STORE_ID)
                 .fetchStream()
-                .map(Records.mapping(StoreRow::new))
+                .map(Records.mapping(ResultRows.StoreRow::new))
                 .filter(Objects::nonNull)
-                .map(StoreRow::toModel)
+                .map(ResultRows.StoreRow::toModel)
                 .collect(ImmutableList.toImmutableList());
     }
 }

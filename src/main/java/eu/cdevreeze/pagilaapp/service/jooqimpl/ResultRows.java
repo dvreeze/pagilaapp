@@ -18,6 +18,7 @@ package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
 import eu.cdevreeze.pagilaapp.model.Address;
 import eu.cdevreeze.pagilaapp.model.City;
+import eu.cdevreeze.pagilaapp.model.Store;
 import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
@@ -66,6 +67,19 @@ public class ResultRows {
                     city.toModel(),
                     Optional.ofNullable(postalCode),
                     phone
+            );
+        }
+    }
+
+    public record StoreRow(
+            @Nullable Integer id,
+            ResultRows.AddressRow address
+    ) {
+
+        public Store toModel() {
+            return new Store(
+                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    address.toModel()
             );
         }
     }
