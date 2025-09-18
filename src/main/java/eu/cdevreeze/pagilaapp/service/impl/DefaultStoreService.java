@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Comparator;
+
 /**
  * Default StoreService implementation.
  *
@@ -79,6 +81,7 @@ public class DefaultStoreService implements StoreService {
                 .setHint(LOAD_GRAPH_KEY, storeGraph)
                 .getResultStream()
                 .map(EntityConversions::convertStoreEntityToModel)
+                .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 

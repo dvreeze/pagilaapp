@@ -38,6 +38,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Comparator;
+
 /**
  * Default AddressService implementation.
  *
@@ -85,6 +87,7 @@ public class DefaultAddressService implements AddressService {
                 .setHint(LOAD_GRAPH_KEY, addressGraph)
                 .getResultStream()
                 .map(EntityConversions::convertAddressEntityToModel)
+                .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 }

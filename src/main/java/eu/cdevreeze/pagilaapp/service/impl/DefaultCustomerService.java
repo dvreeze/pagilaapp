@@ -35,6 +35,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Comparator;
+
 /**
  * Default CustomerService implementation.
  *
@@ -79,6 +81,7 @@ public class DefaultCustomerService implements CustomerService {
                 .setHint(LOAD_GRAPH_KEY, customerGraph)
                 .getResultStream()
                 .map(EntityConversions::convertCustomerEntityToModel)
+                .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 

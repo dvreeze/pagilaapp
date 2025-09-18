@@ -127,6 +127,7 @@ public class DefaultFilmService implements FilmService {
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
                 .map(EntityConversions::convertFilmEntityToModel)
+                .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -168,6 +169,7 @@ public class DefaultFilmService implements FilmService {
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
                 .map(EntityConversions::convertFilmEntityToModel)
+                .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -210,6 +212,7 @@ public class DefaultFilmService implements FilmService {
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
                 .map(EntityConversions::convertFilmEntityToModel)
+                .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 
