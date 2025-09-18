@@ -19,10 +19,8 @@ package eu.cdevreeze.pagilaapp.service.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.*;
-import eu.cdevreeze.pagilaapp.model.Address;
-import eu.cdevreeze.pagilaapp.model.City;
+import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Customer;
-import eu.cdevreeze.pagilaapp.model.Store;
 import eu.cdevreeze.pagilaapp.service.CustomerService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
@@ -36,9 +34,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Default CustomerService implementation.
@@ -83,7 +78,7 @@ public class DefaultCustomerService implements CustomerService {
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, customerGraph)
                 .getResultStream()
-                .map(this::convertEntityToModel)
+                .map(EntityConversions::convertCustomerEntityToModel)
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -112,45 +107,5 @@ public class DefaultCustomerService implements CustomerService {
         citySubgraph.addAttributeNode(CityEntity_.country);
 
         return customerGraph;
-    }
-
-    private Customer convertEntityToModel(CustomerEntity customerEntity) {
-        return new Customer(
-                Stream.ofNullable(customerEntity.getId()).mapToInt(i -> i).findFirst(),
-                convertEntityToModel(customerEntity.getStore()),
-                customerEntity.getFirstName(),
-                customerEntity.getLastName(),
-                Optional.ofNullable(customerEntity.getEmail()),
-                convertEntityToModel(customerEntity.getAddress()),
-                Optional.ofNullable(customerEntity.getActive()).stream().anyMatch(v -> v == 1),
-                customerEntity.getCreateDate()
-        );
-    }
-
-    private Store convertEntityToModel(StoreEntity storeEntity) {
-        return new Store(
-                Stream.ofNullable(storeEntity.getId()).mapToInt(i -> i).findFirst(),
-                convertEntityToModel(storeEntity.getAddress())
-        );
-    }
-
-    private Address convertEntityToModel(AddressEntity addressEntity) {
-        return new Address(
-                Stream.ofNullable(addressEntity.getId()).mapToInt(i -> i).findFirst(),
-                addressEntity.getAddress(),
-                Optional.ofNullable(addressEntity.getAddress2()),
-                addressEntity.getDistrict(),
-                convertEntityToModel(addressEntity.getCity()),
-                Optional.ofNullable(addressEntity.getPostalCode()),
-                addressEntity.getPhone()
-        );
-    }
-
-    private City convertEntityToModel(CityEntity cityEntity) {
-        return new City(
-                Stream.ofNullable(cityEntity.getId()).mapToInt(i -> i).findFirst(),
-                cityEntity.getCity(),
-                cityEntity.getCountry().getCountry()
-        );
     }
 }

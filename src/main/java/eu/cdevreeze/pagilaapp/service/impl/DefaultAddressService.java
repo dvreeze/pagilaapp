@@ -22,8 +22,8 @@ import eu.cdevreeze.pagilaapp.entity.AddressEntity;
 import eu.cdevreeze.pagilaapp.entity.AddressEntity_;
 import eu.cdevreeze.pagilaapp.entity.CityEntity;
 import eu.cdevreeze.pagilaapp.entity.CityEntity_;
+import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Address;
-import eu.cdevreeze.pagilaapp.model.City;
 import eu.cdevreeze.pagilaapp.service.AddressService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
@@ -37,9 +37,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Default AddressService implementation.
@@ -87,25 +84,7 @@ public class DefaultAddressService implements AddressService {
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, addressGraph)
                 .getResultStream()
-                .map(this::convertEntityToModel)
+                .map(EntityConversions::convertAddressEntityToModel)
                 .collect(ImmutableList.toImmutableList());
-    }
-
-    private Address convertEntityToModel(AddressEntity addressEntity) {
-        // Called within the persistence context
-        // The needed associated data has already been loaded, so this will not trigger the N + 1 problem
-        return new Address(
-                Stream.ofNullable(addressEntity.getId()).mapToInt(i -> i).findFirst(),
-                addressEntity.getAddress(),
-                Optional.ofNullable(addressEntity.getAddress2()),
-                addressEntity.getDistrict(),
-                new City(
-                        Stream.ofNullable(addressEntity.getCity().getId()).mapToInt(i -> i).findFirst(),
-                        addressEntity.getCity().getCity(),
-                        addressEntity.getCity().getCountry().getCountry()
-                ),
-                Optional.ofNullable(addressEntity.getPostalCode()),
-                addressEntity.getPhone()
-        );
     }
 }

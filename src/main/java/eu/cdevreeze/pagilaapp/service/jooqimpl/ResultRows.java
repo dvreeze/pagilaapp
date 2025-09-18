@@ -28,7 +28,7 @@ import java.util.Optional;
  *
  * @author Chris de Vreeze
  */
-public class ResultRows {
+class ResultRows {
 
     private ResultRows() {
     }

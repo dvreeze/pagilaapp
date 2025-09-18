@@ -20,8 +20,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.pagilaapp.entity.*;
-import eu.cdevreeze.pagilaapp.model.Actor;
-import eu.cdevreeze.pagilaapp.model.Category;
+import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Film;
 import eu.cdevreeze.pagilaapp.service.FilmService;
 import jakarta.persistence.EntityGraph;
@@ -38,7 +37,6 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 /**
  * Default FilmService implementation.
@@ -128,7 +126,7 @@ public class DefaultFilmService implements FilmService {
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
-                .map(this::convertEntityToModel)
+                .map(EntityConversions::convertFilmEntityToModel)
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -169,7 +167,7 @@ public class DefaultFilmService implements FilmService {
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
-                .map(this::convertEntityToModel)
+                .map(EntityConversions::convertFilmEntityToModel)
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -211,7 +209,7 @@ public class DefaultFilmService implements FilmService {
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
-                .map(this::convertEntityToModel)
+                .map(EntityConversions::convertFilmEntityToModel)
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -245,54 +243,5 @@ public class DefaultFilmService implements FilmService {
         Subgraph<FilmActorEntity> filmActorSubgraph = filmGraph.addElementSubgraph(FilmEntity_.actors);
         filmActorSubgraph.addAttributeNode(FilmActorEntity_.actor);
         return filmGraph;
-    }
-
-    private Film convertEntityToModel(FilmEntity filmEntity) {
-        // Called within the persistence context
-        // The needed associated data has already been loaded, so this will not trigger the N + 1 problem
-        return new Film(
-                Stream.ofNullable(filmEntity.getId()).mapToInt(i -> i).findFirst(),
-                filmEntity.getTitle(),
-                Optional.ofNullable(filmEntity.getDescription()),
-                Optional.ofNullable(filmEntity.getReleaseYear()),
-                filmEntity.getLanguage().getRawName().strip(),
-                Optional.ofNullable(filmEntity.getOriginalLanguage()).map(LanguageEntity::getRawName).map(String::strip),
-                filmEntity.getCategories()
-                        .stream()
-                        .map(this::extractCategory)
-                        .collect(ImmutableSet.toImmutableSet()),
-                Optional.ofNullable(filmEntity.getActors()).orElse(Set.of())
-                        .stream()
-                        .map(this::extractActor)
-                        .collect(ImmutableSet.toImmutableSet()),
-                filmEntity.getRentalDuration(),
-                filmEntity.getRentalRate(),
-                Stream.ofNullable(filmEntity.getLength()).mapToInt(i -> i).findFirst(),
-                filmEntity.getReplacementCost(),
-                Optional.ofNullable(filmEntity.getRating()),
-                Optional.ofNullable(filmEntity.getSpecialFeatures())
-                        .map(specFeatures ->
-                                specFeatures.stream().collect(ImmutableSet.toImmutableSet())
-                        )
-        );
-    }
-
-    private Actor extractActor(FilmActorEntity filmActorEntity) {
-        // Called within the persistence context
-        // The needed associated data has already been loaded
-        return new Actor(
-                Stream.ofNullable(filmActorEntity.getActor().getId()).mapToInt(i -> i).findFirst(),
-                filmActorEntity.getActor().getFirstName(),
-                filmActorEntity.getActor().getLastName()
-        );
-    }
-
-    private Category extractCategory(FilmCategoryEntity filmCategoryEntity) {
-        // Called within the persistence context
-        // The needed associated data has already been loaded
-        return new Category(
-                Stream.ofNullable(filmCategoryEntity.getCategory().getId()).mapToInt(i -> i).findFirst(),
-                filmCategoryEntity.getCategory().getName()
-        );
     }
 }

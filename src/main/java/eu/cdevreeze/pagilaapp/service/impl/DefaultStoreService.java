@@ -19,8 +19,7 @@ package eu.cdevreeze.pagilaapp.service.impl;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.*;
-import eu.cdevreeze.pagilaapp.model.Address;
-import eu.cdevreeze.pagilaapp.model.City;
+import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Store;
 import eu.cdevreeze.pagilaapp.service.StoreService;
 import jakarta.persistence.EntityGraph;
@@ -35,9 +34,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import java.util.Optional;
-import java.util.stream.Stream;
 
 /**
  * Default StoreService implementation.
@@ -82,7 +78,7 @@ public class DefaultStoreService implements StoreService {
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, storeGraph)
                 .getResultStream()
-                .map(this::convertEntityToModel)
+                .map(EntityConversions::convertStoreEntityToModel)
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -98,32 +94,5 @@ public class DefaultStoreService implements StoreService {
         citySubgraph.addAttributeNode(CityEntity_.country);
 
         return storeGraph;
-    }
-
-    private Store convertEntityToModel(StoreEntity storeEntity) {
-        return new Store(
-                Stream.ofNullable(storeEntity.getId()).mapToInt(i -> i).findFirst(),
-                convertEntityToModel(storeEntity.getAddress())
-        );
-    }
-
-    private Address convertEntityToModel(AddressEntity addressEntity) {
-        return new Address(
-                Stream.ofNullable(addressEntity.getId()).mapToInt(i -> i).findFirst(),
-                addressEntity.getAddress(),
-                Optional.ofNullable(addressEntity.getAddress2()),
-                addressEntity.getDistrict(),
-                convertEntityToModel(addressEntity.getCity()),
-                Optional.ofNullable(addressEntity.getPostalCode()),
-                addressEntity.getPhone()
-        );
-    }
-
-    private City convertEntityToModel(CityEntity cityEntity) {
-        return new City(
-                Stream.ofNullable(cityEntity.getId()).mapToInt(i -> i).findFirst(),
-                cityEntity.getCity(),
-                cityEntity.getCountry().getCountry()
-        );
     }
 }
