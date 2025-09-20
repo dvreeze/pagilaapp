@@ -18,8 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
-
 /**
  * Country JPA entity. Each instance represents a row in the corresponding table.
  *
@@ -37,9 +35,6 @@ public class CountryEntity {
     @Column(name = "country", nullable = false)
     private String country;
 
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
-
     public Integer getId() {
         return id;
     }
@@ -54,13 +49,5 @@ public class CountryEntity {
 
     public void setCountry(String country) {
         this.country = country;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

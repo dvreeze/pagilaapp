@@ -21,8 +21,14 @@
  * Also, with these data classes what you see is what you get: no lazy loading, no proxying, and no
  * hidden state.
  * <p>
+ * Note that immutable record classes as data representations bring back some best practices treated
+ * in the book Effective Java by Joshua Bloch. Old school JavaBeans with getters and setters should
+ * largely be seen as obsolete, except where they are hard to avoid. Modern Java code is more functional
+ * in nature than old school "imperative code", and Java records clearly belong to modern Java.
+ * That said, there is a place for mutability, but in general limiting mutability should be strived for.
+ * <p>
  * These immutable data classes help make the abstract service API completely technology-agnostic,
- * which also enhanced testability of higher layers than the service layer.
+ * which also enhances testability of higher layers than the service layer.
  *
  * @author Chris de Vreeze
  */

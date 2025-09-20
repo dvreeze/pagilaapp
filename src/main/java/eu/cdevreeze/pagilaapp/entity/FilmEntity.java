@@ -19,8 +19,8 @@ package eu.cdevreeze.pagilaapp.entity;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
-import java.time.Instant;
 import java.time.Year;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +31,9 @@ import java.util.Set;
  */
 @Entity(name = "Film")
 public class FilmEntity {
+
+    // See https://thorben-janssen.com/ultimate-guide-association-mappings-jpa-hibernate/
+    // for the many-to-many associations
 
     @Id
     @Column(name = "film_id", nullable = false)
@@ -56,11 +59,21 @@ public class FilmEntity {
     @JoinColumn(name = "original_language_id", referencedColumnName = "language_id")
     private LanguageEntity originalLanguage;
 
-    @OneToMany(mappedBy = FilmCategoryEntity_.FILM)
-    private Set<FilmCategoryEntity> categories;
+    @ManyToMany
+    @JoinTable(
+            name = "FilmCategory",
+            joinColumns = {@JoinColumn(name = "film_id")},
+            inverseJoinColumns = {@JoinColumn(name = "category_id")}
+    )
+    private Set<CategoryEntity> categories = new HashSet<>();
 
-    @OneToMany(mappedBy = FilmActorEntity_.FILM)
-    private Set<FilmActorEntity> actors;
+    @ManyToMany
+    @JoinTable(
+            name = "FilmActor",
+            joinColumns = {@JoinColumn(name = "film_id")},
+            inverseJoinColumns = {@JoinColumn(name = "actor_id")}
+    )
+    private Set<ActorEntity> actors = new HashSet<>();
 
     @Column(name = "rental_duration", nullable = false)
     private Short rentalDuration;
@@ -76,9 +89,6 @@ public class FilmEntity {
 
     @Column(name = "rating")
     private String rating;
-
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
 
     @Column(name = "special_features")
     private List<String> specialFeatures;
@@ -131,19 +141,19 @@ public class FilmEntity {
         this.originalLanguage = originalLanguage;
     }
 
-    public Set<FilmCategoryEntity> getCategories() {
+    public Set<CategoryEntity> getCategories() {
         return categories;
     }
 
-    public void setCategories(Set<FilmCategoryEntity> categories) {
+    public void setCategories(Set<CategoryEntity> categories) {
         this.categories = categories;
     }
 
-    public Set<FilmActorEntity> getActors() {
+    public Set<ActorEntity> getActors() {
         return actors;
     }
 
-    public void setActors(Set<FilmActorEntity> actors) {
+    public void setActors(Set<ActorEntity> actors) {
         this.actors = actors;
     }
 
@@ -185,14 +195,6 @@ public class FilmEntity {
 
     public void setRating(String rating) {
         this.rating = rating;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 
     public List<String> getSpecialFeatures() {

@@ -18,7 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
 import java.time.LocalDate;
 
 /**
@@ -57,9 +56,6 @@ public class CustomerEntity {
 
     @Column(name = "active")
     private Integer active;
-
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
 
     public Integer getId() {
         return id;
@@ -123,13 +119,5 @@ public class CustomerEntity {
 
     public void setActive(Integer active) {
         this.active = active;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

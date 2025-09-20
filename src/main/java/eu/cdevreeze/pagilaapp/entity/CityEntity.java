@@ -18,8 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
-
 /**
  * City JPA entity. Each instance represents a row in the corresponding table.
  *
@@ -40,9 +38,6 @@ public class CityEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "country_id", referencedColumnName = "country_id")
     private CountryEntity country;
-
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
 
     public Integer getId() {
         return id;
@@ -66,13 +61,5 @@ public class CityEntity {
 
     public void setCountry(CountryEntity country) {
         this.country = country;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

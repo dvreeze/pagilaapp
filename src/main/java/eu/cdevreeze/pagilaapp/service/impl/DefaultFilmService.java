@@ -26,7 +26,6 @@ import eu.cdevreeze.pagilaapp.service.FilmService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Subgraph;
 import jakarta.persistence.criteria.*;
 import org.hibernate.internal.SessionImpl;
 import org.springframework.beans.factory.annotation.Value;
@@ -123,6 +122,7 @@ public class DefaultFilmService implements FilmService {
 
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
+        // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
@@ -148,8 +148,7 @@ public class DefaultFilmService implements FilmService {
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
-        Join<FilmEntity, FilmCategoryEntity> filmCategoryJoin = filmRoot.join(FilmEntity_.categories, JoinType.LEFT);
-        Join<FilmCategoryEntity, CategoryEntity> categoryJoin = filmCategoryJoin.join(FilmCategoryEntity_.category, JoinType.LEFT);
+        Join<FilmEntity, CategoryEntity> categoryJoin = filmRoot.join(FilmEntity_.categories, JoinType.LEFT);
         // No need to explicitly set a query parameter when using the Criteria API.
         // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
         cq.where(
@@ -165,6 +164,7 @@ public class DefaultFilmService implements FilmService {
 
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
+        // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
@@ -184,8 +184,7 @@ public class DefaultFilmService implements FilmService {
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
-        Join<FilmEntity, FilmActorEntity> filmActorJoin = filmRoot.join(FilmEntity_.actors, JoinType.LEFT);
-        Join<FilmActorEntity, ActorEntity> actorJoin = filmActorJoin.join(FilmActorEntity_.actor, JoinType.LEFT);
+        Join<FilmEntity, ActorEntity> actorJoin = filmRoot.join(FilmEntity_.actors, JoinType.LEFT);
         // No need to explicitly set a query parameter when using the Criteria API.
         // SQL injection is prevented, and the generated SQL is parameterized and the database can reuse the query plan for it.
         cq.where(
@@ -208,6 +207,7 @@ public class DefaultFilmService implements FilmService {
 
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
+        // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultStream()
@@ -239,12 +239,8 @@ public class DefaultFilmService implements FilmService {
         filmGraph.addAttributeNode(FilmEntity_.originalLanguage);
 
         filmGraph.addAttributeNode(FilmEntity_.categories);
-        Subgraph<FilmCategoryEntity> filmCategorySubgraph = filmGraph.addElementSubgraph(FilmEntity_.categories);
-        filmCategorySubgraph.addAttributeNode(FilmCategoryEntity_.category);
 
         filmGraph.addAttributeNode(FilmEntity_.actors);
-        Subgraph<FilmActorEntity> filmActorSubgraph = filmGraph.addElementSubgraph(FilmEntity_.actors);
-        filmActorSubgraph.addAttributeNode(FilmActorEntity_.actor);
         return filmGraph;
     }
 }

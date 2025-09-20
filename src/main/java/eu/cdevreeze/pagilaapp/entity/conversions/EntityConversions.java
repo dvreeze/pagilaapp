@@ -89,11 +89,11 @@ public class EntityConversions {
                 Optional.ofNullable(filmEntity.getOriginalLanguage()).map(LanguageEntity::getRawName).map(String::strip),
                 filmEntity.getCategories()
                         .stream()
-                        .map(EntityConversions::extractCategory)
+                        .map(EntityConversions::convertCategoryEntityToModel)
                         .collect(ImmutableSet.toImmutableSet()),
                 Optional.ofNullable(filmEntity.getActors()).orElse(Set.of())
                         .stream()
-                        .map(EntityConversions::extractActor)
+                        .map(EntityConversions::convertActorEntityToModel)
                         .collect(ImmutableSet.toImmutableSet()),
                 filmEntity.getRentalDuration(),
                 filmEntity.getRentalRate(),
@@ -107,18 +107,18 @@ public class EntityConversions {
         );
     }
 
-    private static Actor extractActor(FilmActorEntity filmActorEntity) {
+    public static Actor convertActorEntityToModel(ActorEntity actorEntity) {
         return new Actor(
-                Stream.ofNullable(filmActorEntity.getActor().getId()).mapToInt(i -> i).findFirst(),
-                filmActorEntity.getActor().getFirstName(),
-                filmActorEntity.getActor().getLastName()
+                Stream.ofNullable(actorEntity.getId()).mapToInt(i -> i).findFirst(),
+                actorEntity.getFirstName(),
+                actorEntity.getLastName()
         );
     }
 
-    private static Category extractCategory(FilmCategoryEntity filmCategoryEntity) {
+    public static Category convertCategoryEntityToModel(CategoryEntity categoryEntity) {
         return new Category(
-                Stream.ofNullable(filmCategoryEntity.getCategory().getId()).mapToInt(i -> i).findFirst(),
-                filmCategoryEntity.getCategory().getName()
+                Stream.ofNullable(categoryEntity.getId()).mapToInt(i -> i).findFirst(),
+                categoryEntity.getName()
         );
     }
 }

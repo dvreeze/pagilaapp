@@ -18,8 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
-
 /**
  * Language JPA entity. Each instance represents a row in the corresponding table.
  *
@@ -39,9 +37,6 @@ public class LanguageEntity {
     @Column(name = "name", nullable = false, columnDefinition = "bpchar")
     private String rawName;
 
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
-
     public Integer getId() {
         return id;
     }
@@ -56,13 +51,5 @@ public class LanguageEntity {
 
     public void setRawName(String rawName) {
         this.rawName = rawName;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

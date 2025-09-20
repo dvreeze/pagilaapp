@@ -77,6 +77,7 @@ public class DefaultCustomerService implements CustomerService {
 
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
+        // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, customerGraph)
                 .getResultStream()

@@ -18,8 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
-
 /**
  * Category JPA entity. Each instance represents a row in the corresponding table.
  *
@@ -37,9 +35,6 @@ public class CategoryEntity {
     @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
-
     public Integer getId() {
         return id;
     }
@@ -54,13 +49,5 @@ public class CategoryEntity {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

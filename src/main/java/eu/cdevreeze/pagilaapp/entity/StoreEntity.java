@@ -18,8 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
-
 /**
  * Store JPA entity. Each instance represents a row in the corresponding table.
  *
@@ -41,9 +39,6 @@ public class StoreEntity {
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
     @JoinColumn(name = "address_id", referencedColumnName = "address_id")
     private AddressEntity address;
-
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
 
     public Integer getId() {
         return id;
@@ -67,13 +62,5 @@ public class StoreEntity {
 
     public void setAddress(AddressEntity address) {
         this.address = address;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

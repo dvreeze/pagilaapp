@@ -6,12 +6,10 @@
         <class>eu.cdevreeze.pagilaapp.entity.CategoryEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.CityEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.CountryEntity</class>
-        <class>eu.cdevreeze.pagilaapp.entity.FilmActorEntity</class>
-        <class>eu.cdevreeze.pagilaapp.entity.FilmActorKey</class>
-        <class>eu.cdevreeze.pagilaapp.entity.FilmCategoryEntity</class>
-        <class>eu.cdevreeze.pagilaapp.entity.FilmCategoryKey</class>
+        <class>eu.cdevreeze.pagilaapp.entity.CustomerEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.FilmEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.LanguageEntity</class>
+        <class>eu.cdevreeze.pagilaapp.entity.StoreEntity</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
             <!-- Left empty. See https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2#a12384. -->

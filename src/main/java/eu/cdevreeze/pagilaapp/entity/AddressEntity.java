@@ -18,8 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
-
 /**
  * Address JPA entity. Each instance represents a row in the corresponding table.
  *
@@ -52,9 +50,6 @@ public class AddressEntity {
 
     @Column(name = "phone", nullable = false)
     private String phone;
-
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
 
     public Integer getId() {
         return id;
@@ -110,13 +105,5 @@ public class AddressEntity {
 
     public void setPhone(String phone) {
         this.phone = phone;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }

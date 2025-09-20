@@ -18,8 +18,6 @@ package eu.cdevreeze.pagilaapp.entity;
 
 import jakarta.persistence.*;
 
-import java.time.Instant;
-
 /**
  * Actor JPA entity. Each instance represents a row in the corresponding table.
  *
@@ -39,9 +37,6 @@ public class ActorEntity {
 
     @Column(name = "last_name", nullable = false)
     private String lastName;
-
-    @Column(name = "last_update", nullable = false)
-    private Instant lastUpdate;
 
     public Integer getId() {
         return id;
@@ -65,13 +60,5 @@ public class ActorEntity {
 
     public void setLastName(String lastName) {
         this.lastName = lastName;
-    }
-
-    public Instant getLastUpdate() {
-        return lastUpdate;
-    }
-
-    public void setLastUpdate(Instant lastUpdate) {
-        this.lastUpdate = lastUpdate;
     }
 }
