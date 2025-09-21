@@ -2,37 +2,42 @@
 
 ## My project experience with Hibernate
 
-... Not working with the database; seeing far too many generated SQL queries ...
-... Vietnam of Computer Science ...
-... Disconnect with functional programming ...
-... Bottom line: I did not understand Hibernate, and did not want to use it ...
+Contents:
++ Not working with the database; seeing far too many generated SQL queries
++ Vietnam of Computer Science
++ Disconnect with functional programming
++ Bottom line: I did not understand Hibernate, and did not want to use it
 
 ## Working with the database rather than against it
 
-... Working with Hibernate while studying the Hibernate documentation ...
-... Learning the Hibernate is more than mainly the first level cache (note Hibernate's `StatelessSession`) ...
-... In a way, JPQL is a beautiful SQL dialect ...
-... Learning that associations should be lazily fetched (show explanatory links) ...
-... And learning that entity graphs (or alternatives) should be used to choose fetching strategy per query ...
-... In other words, working with the database (joining tables, in Java-friendly way) ...
-... Learning about the [JPA/Hibernate tutorials by Thorben Janssen](https://thorben-janssen.com/tutorials/#popular) ...
+Contents:
++ Working with Hibernate while studying the Hibernate documentation
++ Learning that Hibernate is more than mainly the first level cache (note Hibernate's `StatelessSession`)
++ In a way, JPQL is a beautiful SQL dialect
++ Learning that associations should be lazily fetched (show explanatory links)
++ And learning that entity graphs (or alternatives) should be used to choose fetching strategy per query
++ In other words, working with the database (joining tables, in Java-friendly way)
++ Learning about the [JPA/Hibernate tutorials by Thorben Janssen](https://thorben-janssen.com/tutorials/#popular)
 
 ## Using the metamodel
 
-... Consider using the metamodel, for compile-time type-safe querying ...
+Contents:
++ Consider using the metamodel, for compile-time type-safe querying
 
 ## Combining the use of JPA entities with immutable Java record classes
 
-... JPA entities are very poor DTOs; they should be internal to service layer implementations ...
-... An application architecture that works well in my opinion, with service interfaces exchanging immutable records ...
-... Things I learned in (for example) this project (such as pitfalls of method `getResultStream`)
+Contents:
++ JPA entities are very poor DTOs; they should be internal to service layer implementations
++ An application architecture that works well in my opinion, with service interfaces exchanging immutable records
++ Things I learned in (for example) this project (such as pitfalls of method `getResultStream`)
 
 ## Learning jOOQ
 
-... Sometimes JPA/Hibernate is not the best fit (when?) ...
-... Moreover, SQL itself is much more expressive than I realized, e.g. regarding non-flat result set data ...
-... This makes jOOQ very attractive, if not as JPA/Hibernate alternative, then at least as addition ...
-... By all means, use jOOQ in a type-safe way, using its generated metamodel ...
+Contents:
++ Sometimes JPA/Hibernate is not the best fit (when?)
++ Moreover, SQL itself is much more expressive than I realized, e.g. regarding non-flat result set data
++ This makes jOOQ very attractive, if not as JPA/Hibernate alternative, then at least as addition
++ By all means, use jOOQ in a type-safe way, using its generated metamodel
 
 ## References
 
