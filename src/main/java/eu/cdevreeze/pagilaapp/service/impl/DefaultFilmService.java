@@ -28,13 +28,12 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.criteria.*;
 import org.hibernate.internal.SessionImpl;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
-import java.util.*;
+import java.util.Comparator;
 import java.util.stream.Collectors;
 
 /**
@@ -54,14 +53,8 @@ public class DefaultFilmService implements FilmService {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    private final int numberOfJpaQueriesToGetAllFilms;
-
-    public DefaultFilmService(
-            EntityManager entityManager,
-            @Value("${numberOfJpaQueriesToGetAllFilms}") int numberOfJpaQueriesToGetAllFilms
-    ) {
+    public DefaultFilmService(EntityManager entityManager) {
         this.entityManager = entityManager;
-        this.numberOfJpaQueriesToGetAllFilms = numberOfJpaQueriesToGetAllFilms;
     }
 
     @Override
@@ -70,27 +63,27 @@ public class DefaultFilmService implements FilmService {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
         System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
 
-        // Trying to find all films the same way as the queries below did not work. It led to loss of film actor data,
-        // and lots of film data duplication. Hence, the use of multiple queries, combining the results afterward.
+        // First build up the query (without worrying about the load/fetch graph)
+        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
-        Set<String> categories = findAllFilmCategories();
+        Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
+        cq.select(filmRoot);
 
-        int queryCount = numberOfJpaQueriesToGetAllFilms;
-        Map<Integer, List<String>> categoryGroups = categories
+        // Next build up the entity graph, to specify which associated data should be fetched
+        // At the same time, this helps achieve good performance, by solving the N + 1 problem
+        EntityGraph<FilmEntity> filmGraph = createEntityGraph();
+
+        // Run the query, providing the load graph as query hint
+        // Note that JPA entities do not escape the persistence context
+        // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
+        // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
+        return entityManager.createQuery(cq)
+                .setHint(LOAD_GRAPH_KEY, filmGraph)
+                .getResultList()
                 .stream()
-                .collect(Collectors.groupingBy(cat -> cat.hashCode() % queryCount));
-
-        Map<Integer, List<Film>> filmGroups = categoryGroups
-                .entrySet()
-                .stream()
-                .map(kv -> Map.entry(kv.getKey(), findFilmsByCategories(ImmutableSet.copyOf(kv.getValue()))))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-
-        return filmGroups.values()
-                .stream()
-                .flatMap(Collection::stream)
+                .map(EntityConversions::convertFilmEntityToModel)
                 .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
-                .distinct()
                 .collect(ImmutableList.toImmutableList());
     }
 
@@ -123,9 +116,11 @@ public class DefaultFilmService implements FilmService {
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
+        // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
-                .getResultStream()
+                .getResultList()
+                .stream()
                 .map(EntityConversions::convertFilmEntityToModel)
                 .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
@@ -165,9 +160,11 @@ public class DefaultFilmService implements FilmService {
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
+        // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
-                .getResultStream()
+                .getResultList()
+                .stream()
                 .map(EntityConversions::convertFilmEntityToModel)
                 .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
@@ -208,9 +205,11 @@ public class DefaultFilmService implements FilmService {
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
+        // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
-                .getResultStream()
+                .getResultList()
+                .stream()
                 .map(EntityConversions::convertFilmEntityToModel)
                 .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());

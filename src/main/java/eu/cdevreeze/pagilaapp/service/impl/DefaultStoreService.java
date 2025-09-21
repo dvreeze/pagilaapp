@@ -78,9 +78,11 @@ public class DefaultStoreService implements StoreService {
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
+        // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
         return entityManager.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, storeGraph)
-                .getResultStream()
+                .getResultList()
+                .stream()
                 .map(EntityConversions::convertStoreEntityToModel)
                 .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
