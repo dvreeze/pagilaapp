@@ -3,15 +3,15 @@
 ## My project experience with Hibernate
 
 Contents:
-+ Not working with the database; seeing far too many generated SQL queries
++ Not working with the database; seeing far too many generated SQL queries in Java projects I was involved in
 + Vietnam of Computer Science
 + Disconnect with functional programming
-+ Bottom line: I did not understand Hibernate, and did not want to use it
++ Bottom line: for a long time I did not understand Hibernate, and did not want to use it
 
 ## Working with the database rather than against it
 
 Contents:
-+ Working with Hibernate while studying the Hibernate documentation
++ Later, I started working with instead of against Hibernate, while studying the Hibernate documentation
 + Learning that Hibernate is more than mainly the first level cache (note Hibernate's `StatelessSession`)
 + In a way, JPQL is a beautiful SQL dialect
 + Learning that associations should be lazily fetched (show explanatory links)
