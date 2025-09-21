@@ -35,7 +35,7 @@ Contents:
 
 Contents:
 + Sometimes JPA/Hibernate is not the best fit (when?)
-+ Moreover, SQL itself is much more expressive than I realized, e.g. regarding non-flat result set data
++ Moreover, SQL itself is much more expressive than I realized, e.g. regarding non-flat result set data (`multiset`, `row`, etc.)
 + This makes jOOQ very attractive, if not as JPA/Hibernate alternative, then at least as addition
 + By all means, use jOOQ in a type-safe way, using its generated metamodel
 
@@ -53,4 +53,5 @@ Some references:
   + [LazyInitializationException What it is and the best way to fix it](https://thorben-janssen.com/lazyinitializationexception/)
   + [6 Hibernate mappings you should avoid for high-performance applications](https://thorben-janssen.com/6-hibernate-mappings-you-should-avoid-for-high-performance-applications/)
   + [Hibernate logging guide](https://thorben-janssen.com/hibernate-logging-guide/)
+  + [JPA 2.2 `getResultStream` method and how not to use it](https://thorben-janssen.com/jpa-2-2s-new-stream-method-and-how-you-should-not-use-it/)
 + [Returning DTOs instead of entities in Spring Boot](https://igventurelli.io/what-is-a-dto-and-why-you-shouldnt-return-your-entities-in-spring-boot/)
