@@ -30,7 +30,7 @@ import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
 import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.slices;
 
 /**
- * Unit test testing the application architecture using ArchUnit.
+ * Unit test testing the application architecture, using <a href="https://www.archunit.org/">ArchUnit</a>.
  *
  * @author Chris de Vreeze
  */
