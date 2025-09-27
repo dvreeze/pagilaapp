@@ -47,6 +47,8 @@ public class JpaUsageTest {
     public static final ArchRule lazyFetchingRule =
             classes()
                     .that().areAnnotatedWith(Entity.class)
+                    .or().areAnnotatedWith(MappedSuperclass.class)
+                    .or().areAnnotatedWith(Embeddable.class)
                     .should(useLazyFetchingOnly());
 
     private static ArchCondition<JavaClass> useLazyFetchingOnly() {
