@@ -32,7 +32,7 @@ public class StoreEntity {
     @SequenceGenerator(name = "Store_seq_gen", sequenceName = "store_store_id_seq", allocationSize = 1)
     private Integer id;
 
-    // TODO Relationship
+    // Not a relationship, in order to avoid circular initialization issues between Store and Staff
     @Column(name = "manager_staff_id", nullable = false)
     private Integer managerStaffId;
 

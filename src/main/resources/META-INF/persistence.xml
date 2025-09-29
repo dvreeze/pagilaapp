@@ -9,6 +9,7 @@
         <class>eu.cdevreeze.pagilaapp.entity.CustomerEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.FilmEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.LanguageEntity</class>
+        <class>eu.cdevreeze.pagilaapp.entity.StaffEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.StoreEntity</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
         <properties>
