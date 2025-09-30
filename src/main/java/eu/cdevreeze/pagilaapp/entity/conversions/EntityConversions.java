@@ -17,11 +17,13 @@
 package eu.cdevreeze.pagilaapp.entity.conversions;
 
 import com.google.common.collect.ImmutableSet;
+import com.google.common.primitives.ImmutableIntArray;
 import eu.cdevreeze.pagilaapp.entity.*;
 import eu.cdevreeze.pagilaapp.model.*;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 /**
@@ -49,6 +51,29 @@ public class EntityConversions {
                 convertAddressEntityToModel(customerEntity.getAddress()),
                 Optional.ofNullable(customerEntity.getActive()).stream().anyMatch(v -> v == 1),
                 customerEntity.getCreateDate()
+        );
+    }
+
+    public static Staff convertStaffEntityToModel(StaffEntity staffEntity) {
+        Optional<byte[]> pictureByteArrayOption = Optional.ofNullable(staffEntity.getPicture());
+        Optional<ImmutableIntArray> pictureOption = pictureByteArrayOption.map(pic ->
+                ImmutableIntArray
+                        .builder()
+                        .addAll(IntStream.range(0, pic.length).map(idx -> pic[idx]))
+                        .build()
+        );
+
+        return new Staff(
+                Stream.ofNullable(staffEntity.getId()).mapToInt(i -> i).findFirst(),
+                staffEntity.getFirstName(),
+                staffEntity.getLastName(),
+                convertAddressEntityToModel(staffEntity.getAddress()),
+                Optional.ofNullable(staffEntity.getEmail()),
+                convertStoreEntityToModel(staffEntity.getStore()),
+                staffEntity.getActive(),
+                staffEntity.getUserName(),
+                Optional.ofNullable(staffEntity.getPassword()),
+                pictureOption
         );
     }
 

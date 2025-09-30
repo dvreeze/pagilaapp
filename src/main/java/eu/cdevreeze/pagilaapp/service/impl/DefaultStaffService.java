@@ -20,8 +20,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.*;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
-import eu.cdevreeze.pagilaapp.model.Customer;
-import eu.cdevreeze.pagilaapp.service.CustomerService;
+import eu.cdevreeze.pagilaapp.model.Staff;
+import eu.cdevreeze.pagilaapp.service.StaffService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
@@ -38,13 +38,13 @@ import org.springframework.transaction.support.TransactionSynchronizationManager
 import java.util.Comparator;
 
 /**
- * Default CustomerService implementation.
+ * Default StaffService implementation.
  *
  * @author Chris de Vreeze
  */
 @Service
 @ConditionalOnBooleanProperty(name = "useJooq", havingValue = false, matchIfMissing = true)
-public class DefaultCustomerService implements CustomerService {
+public class DefaultStaffService implements StaffService {
 
     // See https://thorben-janssen.com/hibernate-tips-how-to-bootstrap-hibernate-with-spring-boot/
 
@@ -54,45 +54,45 @@ public class DefaultCustomerService implements CustomerService {
     @PersistenceContext
     private final EntityManager entityManager;
 
-    public DefaultCustomerService(EntityManager entityManager) {
+    public DefaultStaffService(EntityManager entityManager) {
         this.entityManager = entityManager;
     }
 
     @Override
     @Transactional(readOnly = true)
-    public ImmutableList<Customer> findAllCustomers() {
+    public ImmutableList<Staff> findAllStaffMembers() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
         System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityManager.getCriteriaBuilder();
-        CriteriaQuery<CustomerEntity> cq = cb.createQuery(CustomerEntity.class);
+        CriteriaQuery<StaffEntity> cq = cb.createQuery(StaffEntity.class);
 
-        Root<CustomerEntity> customerRoot = cq.from(CustomerEntity.class);
-        cq.select(customerRoot);
+        Root<StaffEntity> staffRoot = cq.from(StaffEntity.class);
+        cq.select(staffRoot);
 
         // Next build up the entity graph, to specify which associated data should be fetched
         // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<CustomerEntity> customerGraph = createEntityGraph();
+        EntityGraph<StaffEntity> staffGraph = createEntityGraph();
 
         // Run the query, providing the load graph as query hint
         // Note that JPA entities do not escape the persistence context
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
         return entityManager.createQuery(cq)
-                .setHint(LOAD_GRAPH_KEY, customerGraph)
+                .setHint(LOAD_GRAPH_KEY, staffGraph)
                 .getResultList()
                 .stream()
-                .map(EntityConversions::convertCustomerEntityToModel)
+                .map(EntityConversions::convertStaffEntityToModel)
                 .sorted(Comparator.comparingInt(v -> v.idOption().orElse(-1)))
                 .collect(ImmutableList.toImmutableList());
     }
 
-    private EntityGraph<CustomerEntity> createEntityGraph() {
-        EntityGraph<CustomerEntity> customerGraph = entityManager.createEntityGraph(CustomerEntity.class);
+    private EntityGraph<StaffEntity> createEntityGraph() {
+        EntityGraph<StaffEntity> staffGraph = entityManager.createEntityGraph(StaffEntity.class);
 
-        customerGraph.addAttributeNode(CustomerEntity_.store);
-        Subgraph<StoreEntity> storeSubgraph = customerGraph.addSubgraph(CustomerEntity_.store);
+        staffGraph.addAttributeNode(StaffEntity_.store);
+        Subgraph<StoreEntity> storeSubgraph = staffGraph.addSubgraph(StaffEntity_.store);
 
         storeSubgraph.addAttributeNode(StoreEntity_.address);
         Subgraph<AddressEntity> storeAddressSubgraph = storeSubgraph.addSubgraph(StoreEntity_.address);
@@ -102,14 +102,14 @@ public class DefaultCustomerService implements CustomerService {
 
         storeCitySubgraph.addAttributeNode(CityEntity_.country);
 
-        customerGraph.addAttributeNode(CustomerEntity_.address);
-        Subgraph<AddressEntity> addressSubgraph = customerGraph.addSubgraph(CustomerEntity_.address);
+        staffGraph.addAttributeNode(StaffEntity_.address);
+        Subgraph<AddressEntity> addressSubgraph = staffGraph.addSubgraph(StaffEntity_.address);
 
         addressSubgraph.addAttributeNode(AddressEntity_.city);
         Subgraph<CityEntity> citySubgraph = addressSubgraph.addSubgraph(AddressEntity_.city);
 
         citySubgraph.addAttributeNode(CityEntity_.country);
 
-        return customerGraph;
+        return staffGraph;
     }
 }

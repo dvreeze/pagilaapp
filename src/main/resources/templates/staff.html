@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Staff</title>
+    <!-- See https://bootswatch.com/flatly/ -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<!-- For the Bootstrap Grid System, see https://getbootstrap.com/docs/5.2/layout/grid/ -->
+<body>
+<div class="container pt-5">
+    <div class="row gx-5 gy-5">
+        <div class="col-12">
+            <div th:replace="fragments/header.html :: header"></div>
+        </div>
+        <div class="col-12">
+            <table class="table table-bordered table-striped table-responsive-sm caption-top">
+                <caption><strong th:text="${title}" class="h4">Staff</strong></caption>
+                <thead>
+                <tr class="table-info">
+                    <th>ID</th>
+                    <th>First name</th>
+                    <th>Last name</th>
+                    <th>Username</th>
+                    <th>Address</th>
+                    <th>Address 2</th>
+                    <th>District</th>
+                    <th>Postal code</th>
+                    <th>City</th>
+                    <th>Country</th>
+                    <th>Store phone</th>
+                    <th>Store address</th>
+                    <th>Store address 2</th>
+                    <th>Store district</th>
+                    <th>Store postal code</th>
+                    <th>Store city</th>
+                    <th>Store country</th>
+                    <th>Store phone</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="staffMember : ${staffMembers}">
+                    <td th:text="${staffMember.idOption.orElseThrow}">ID</td>
+                    <td th:text="${staffMember.firstName}">address</td>
+                    <td th:text="${staffMember.lastName}">address</td>
+                    <td th:text="${staffMember.userName}">address</td>
+                    <td th:text="${staffMember.address.address}">address</td>
+                    <td th:text="${staffMember.address.address2Option.orElse('')}">address2</td>
+                    <td th:text="${staffMember.address.district}">district</td>
+                    <td th:text="${staffMember.address.postalCodeOption.orElse('')}">postalCode</td>
+                    <td th:text="${staffMember.address.city.city}">city</td>
+                    <td th:text="${staffMember.address.city.country}">country</td>
+                    <td th:text="${staffMember.address.phone}">phone</td>
+                    <td th:text="${staffMember.store.address.address}">address</td>
+                    <td th:text="${staffMember.store.address.address2Option.orElse('')}">address2</td>
+                    <td th:text="${staffMember.store.address.district}">district</td>
+                    <td th:text="${staffMember.store.address.postalCodeOption.orElse('')}">postalCode</td>
+                    <td th:text="${staffMember.store.address.city.city}">city</td>
+                    <td th:text="${staffMember.store.address.city.country}">country</td>
+                    <td th:text="${staffMember.store.address.phone}">phone</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+</body>
+</html>
