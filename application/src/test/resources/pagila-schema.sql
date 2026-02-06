@@ -312,7 +312,7 @@ BEGIN
     last_month_end := LAST_DAY(last_month_start);
 
     /*
-    Create a temporary storage area for Customer IDs.
+    Create a temporary storage area for eu.cdevreeze.pagilaapp.model.Customer IDs.
     */
     CREATE TEMPORARY TABLE tmpCustomer (customer_id INTEGER NOT NULL PRIMARY KEY);
 

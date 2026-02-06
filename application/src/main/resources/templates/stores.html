@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Addresses</title>
+    <title>Stores</title>
     <!-- See https://bootswatch.com/flatly/ -->
     <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
 </head>
@@ -16,29 +16,29 @@
         </div>
         <div class="col-12">
             <table class="table table-bordered table-striped table-responsive-sm caption-top">
-                <caption><strong th:text="${title}" class="h4">Addresses</strong></caption>
+                <caption><strong th:text="${title}" class="h4">Stores</strong></caption>
                 <thead>
                 <tr class="table-info">
                     <th>ID</th>
-                    <th>Address</th>
-                    <th>Address 2</th>
+                    <th>eu.cdevreeze.pagilaapp.model.Address</th>
+                    <th>eu.cdevreeze.pagilaapp.model.Address 2</th>
                     <th>District</th>
                     <th>Postal code</th>
-                    <th>City</th>
+                    <th>eu.cdevreeze.pagilaapp.model.City</th>
                     <th>Country</th>
                     <th>Phone</th>
                 </tr>
                 </thead>
                 <tbody>
-                <tr th:each="address : ${addresses}">
-                    <td th:text="${address.idOption.orElseThrow}">ID</td>
-                    <td th:text="${address.address}">address</td>
-                    <td th:text="${address.address2Option.orElse('')}">address2</td>
-                    <td th:text="${address.district}">district</td>
-                    <td th:text="${address.postalCodeOption.orElse('')}">postalCode</td>
-                    <td th:text="${address.city.city}">city</td>
-                    <td th:text="${address.city.country}">country</td>
-                    <td th:text="${address.phone}">phone</td>
+                <tr th:each="store : ${stores}">
+                    <td th:text="${store.idOption.orElseThrow}">ID</td>
+                    <td th:text="${store.address.address}">address</td>
+                    <td th:text="${store.address.address2Option.orElse('')}">address2</td>
+                    <td th:text="${store.address.district}">district</td>
+                    <td th:text="${store.address.postalCodeOption.orElse('')}">postalCode</td>
+                    <td th:text="${store.address.city.city}">city</td>
+                    <td th:text="${store.address.city.country}">country</td>
+                    <td th:text="${store.address.phone}">phone</td>
                 </tr>
                 </tbody>
             </table>
