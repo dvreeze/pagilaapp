@@ -21,7 +21,7 @@ import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.*;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Customer;
-import eu.cdevreeze.pagilaapp.service.CustomerService;
+import eu.cdevreeze.pagilaapp.service.api.CustomerService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

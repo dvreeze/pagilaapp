@@ -14,28 +14,17 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.pagilaapp.service;
+package eu.cdevreeze.pagilaapp.service.api;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableSet;
-import eu.cdevreeze.pagilaapp.model.Film;
+import eu.cdevreeze.pagilaapp.model.Customer;
 
 /**
- * API contract of a service for querying and managing films.
+ * API contract of a service for querying and managing customers.
  *
  * @author Chris de Vreeze
  */
-public interface FilmService {
+public interface CustomerService {
 
-    ImmutableList<Film> findAllFilms();
-
-    ImmutableList<Film> findFilmsByLanguage(String language);
-
-    ImmutableList<Film> findFilmsByCategory(String category);
-
-    ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories);
-
-    ImmutableList<Film> findFilmsByActor(String firstName, String lastName);
-
-    ImmutableSet<String> findAllFilmCategories();
+    ImmutableList<Customer> findAllCustomers();
 }

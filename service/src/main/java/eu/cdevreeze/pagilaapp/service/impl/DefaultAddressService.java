@@ -24,7 +24,7 @@ import eu.cdevreeze.pagilaapp.entity.CityEntity;
 import eu.cdevreeze.pagilaapp.entity.CityEntity_;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Address;
-import eu.cdevreeze.pagilaapp.service.AddressService;
+import eu.cdevreeze.pagilaapp.service.api.AddressService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

@@ -34,5 +34,5 @@ module eu.cdevreeze.pagilaapp.service {
 
     // JPA/Hibernate are internals and not exported
     // Public service API as Java interfaces
-    exports eu.cdevreeze.pagilaapp.service;
+    exports eu.cdevreeze.pagilaapp.service.api;
 }

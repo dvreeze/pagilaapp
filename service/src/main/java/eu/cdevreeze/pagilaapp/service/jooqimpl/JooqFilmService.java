@@ -24,7 +24,7 @@ import eu.cdevreeze.pagilaapp.jooq.tables.Language;
 import eu.cdevreeze.pagilaapp.model.Actor;
 import eu.cdevreeze.pagilaapp.model.Category;
 import eu.cdevreeze.pagilaapp.model.Film;
-import eu.cdevreeze.pagilaapp.service.FilmService;
+import eu.cdevreeze.pagilaapp.service.api.FilmService;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Records;

@@ -16,7 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.web.controller;
 
-import eu.cdevreeze.pagilaapp.service.CustomerService;
+import eu.cdevreeze.pagilaapp.service.api.CustomerService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

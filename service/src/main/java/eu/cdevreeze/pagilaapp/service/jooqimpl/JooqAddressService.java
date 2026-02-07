@@ -18,7 +18,7 @@ package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.model.Address;
-import eu.cdevreeze.pagilaapp.service.AddressService;
+import eu.cdevreeze.pagilaapp.service.api.AddressService;
 import org.jooq.DSLContext;
 import org.jooq.Records;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;

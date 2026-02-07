@@ -19,7 +19,7 @@ package eu.cdevreeze.pagilaapp.service.jooqimpl;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import eu.cdevreeze.pagilaapp.model.Staff;
-import eu.cdevreeze.pagilaapp.service.StaffService;
+import eu.cdevreeze.pagilaapp.service.api.StaffService;
 import org.jooq.DSLContext;
 import org.jooq.Records;
 import org.jspecify.annotations.Nullable;

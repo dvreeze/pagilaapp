@@ -19,7 +19,7 @@ package eu.cdevreeze.pagilaapp.web.controller;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.model.Film;
-import eu.cdevreeze.pagilaapp.service.FilmService;
+import eu.cdevreeze.pagilaapp.service.api.FilmService;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.ui.Model;

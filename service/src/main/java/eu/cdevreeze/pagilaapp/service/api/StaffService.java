@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.pagilaapp.service;
+package eu.cdevreeze.pagilaapp.service.api;
 
 import com.google.common.collect.ImmutableList;
-import eu.cdevreeze.pagilaapp.model.Store;
+import eu.cdevreeze.pagilaapp.model.Staff;
 
 /**
- * API contract of a service for querying and managing stores.
+ * API contract of a service for querying and managing staff members.
  *
  * @author Chris de Vreeze
  */
-public interface StoreService {
+public interface StaffService {
 
-    ImmutableList<Store> findAllStores();
+    ImmutableList<Staff> findAllStaffMembers();
 }

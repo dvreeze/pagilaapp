@@ -34,6 +34,6 @@
  * @author Chris de Vreeze
  */
 @NullMarked
-package eu.cdevreeze.pagilaapp.service;
+package eu.cdevreeze.pagilaapp.service.api;
 
 import org.jspecify.annotations.NullMarked;

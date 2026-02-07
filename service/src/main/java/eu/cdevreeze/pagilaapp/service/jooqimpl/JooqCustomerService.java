@@ -18,7 +18,7 @@ package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.model.Customer;
-import eu.cdevreeze.pagilaapp.service.CustomerService;
+import eu.cdevreeze.pagilaapp.service.api.CustomerService;
 import org.jooq.DSLContext;
 import org.jooq.Records;
 import org.jspecify.annotations.Nullable;

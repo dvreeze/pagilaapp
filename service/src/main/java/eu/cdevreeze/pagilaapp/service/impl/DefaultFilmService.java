@@ -22,7 +22,7 @@ import com.google.common.collect.ImmutableSet;
 import eu.cdevreeze.pagilaapp.entity.*;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Film;
-import eu.cdevreeze.pagilaapp.service.FilmService;
+import eu.cdevreeze.pagilaapp.service.api.FilmService;
 import jakarta.persistence.EntityGraph;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;

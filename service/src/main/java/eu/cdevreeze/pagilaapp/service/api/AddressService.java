@@ -14,17 +14,17 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.pagilaapp.service;
+package eu.cdevreeze.pagilaapp.service.api;
 
 import com.google.common.collect.ImmutableList;
-import eu.cdevreeze.pagilaapp.model.Customer;
+import eu.cdevreeze.pagilaapp.model.Address;
 
 /**
- * API contract of a service for querying and managing customers.
+ * API contract of a service for querying and managing addresses.
  *
  * @author Chris de Vreeze
  */
-public interface CustomerService {
+public interface AddressService {
 
-    ImmutableList<Customer> findAllCustomers();
+    ImmutableList<Address> findAllAddresses();
 }
