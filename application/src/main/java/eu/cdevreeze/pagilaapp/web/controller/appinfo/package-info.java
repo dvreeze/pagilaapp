@@ -15,23 +15,11 @@
  */
 
 /**
- * Application Java Module, using the service layer, and offering web access to the application.
- * <p>
- * Internals of the service layer implementation are completely encapsulated in the service layer,
- * so invisible here.
+ * Part of the web layer showing the internal application structure in terms of Java Modules.
  *
  * @author Chris de Vreeze
  */
-module eu.cdevreeze.pagilaapp.application {
-    requires com.google.common;
-    requires org.jspecify;
-    requires spring.boot;
-    requires spring.context;
-    requires spring.web;
-    // Module spring.boot.autoconfigure not required?
-    requires tools.jackson.databind;
+@NullMarked
+package eu.cdevreeze.pagilaapp.web.controller.appinfo;
 
-    requires eu.cdevreeze.pagilaapp.service;
-
-    // No need to export any packages, right?
-}
+import org.jspecify.annotations.NullMarked;
