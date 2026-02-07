@@ -19,7 +19,7 @@
  *
  * @author Chris de Vreeze
  */
-open module eu.cdevreeze.pagilaapp.application {
+module eu.cdevreeze.pagilaapp.application {
     requires com.google.common;
     requires org.jooq;
     requires org.jspecify;

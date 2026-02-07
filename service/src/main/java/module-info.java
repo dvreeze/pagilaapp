@@ -19,7 +19,7 @@
  *
  * @author Chris de Vreeze
  */
-open module eu.cdevreeze.pagilaapp.service {
+module eu.cdevreeze.pagilaapp.service {
     requires com.google.common;
     requires jakarta.annotation;
     requires jakarta.persistence;

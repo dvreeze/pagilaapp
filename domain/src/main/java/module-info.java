@@ -19,7 +19,7 @@
  *
  * @author Chris de Vreeze
  */
-module eu.cdevreeze.pagilaapp.domain { // Not open for reflection
+module eu.cdevreeze.pagilaapp.domain {
     requires transitive com.google.common;
     requires transitive org.jspecify;
 

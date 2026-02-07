@@ -19,3 +19,10 @@ for Java, I am quite impressed by jOOQ. Nowadays, with (immutable) Java records 
 alternative to old school JavaBeans), modern SQL features, and jOOQ's type-safe and disciplined modelling
 of SQL, the case for jOOQ has become quite strong. If desired, we can combine both JPA and jOOQ
 in the same code base, of course.
+
+This is also a Maven multi-module project. This demonstrates that large code bases using Spring Boot
+can very well be organized as Maven multi-module projects.
+
+To go even further, this project also uses Java Modules. This enforces a chosen application architecture,
+and uses the module path rather than the class path, to avoid circular dependencies across modules,
+"split packages", version conflicts, etc. Tests use the class path, however.
