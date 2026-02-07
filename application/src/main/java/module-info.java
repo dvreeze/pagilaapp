@@ -16,6 +16,9 @@
 
 /**
  * Application Java Module, using the service layer, and offering web access to the application.
+ * <p>
+ * Internals of the service layer implementation are completely encapsulated in the service layer,
+ * so invisible here.
  *
  * @author Chris de Vreeze
  */
@@ -25,7 +28,6 @@ module eu.cdevreeze.pagilaapp.application {
     requires spring.boot;
     requires spring.boot.autoconfigure;
     requires spring.context;
-    requires spring.tx;
     requires spring.web;
 
     requires eu.cdevreeze.pagilaapp.service;
