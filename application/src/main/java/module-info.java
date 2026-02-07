@@ -23,12 +23,14 @@
  * @author Chris de Vreeze
  */
 module eu.cdevreeze.pagilaapp.application {
+
+    // Simple Java Module concerning compile-time dependencies, ignoring the Spring runtime which runs on the class path.
+
     requires com.google.common;
     requires org.jspecify;
     requires spring.boot;
     requires spring.context;
     requires spring.web;
-    // Module spring.boot.autoconfigure not required?
     requires tools.jackson.databind;
 
     requires eu.cdevreeze.pagilaapp.service;

@@ -20,6 +20,9 @@
  * @author Chris de Vreeze
  */
 module eu.cdevreeze.pagilaapp.service {
+
+    // Simple Java Module concerning compile-time dependencies, ignoring the Spring runtime which runs on the class path.
+
     requires com.google.common;
     requires jakarta.annotation;
     requires jakarta.persistence;
