@@ -2,7 +2,7 @@
 
 ## This project as a Spring Boot application using a database
 
-This project is used to try out JPA/Hibernate using a non-trivial database.
+This project is used to try out *JPA/Hibernate* using a non-trivial database.
 
 See [sample Pagila DB](https://github.com/devrimgunduz/pagila/tree/master) for initializing the database using Docker.
 Make sure to start the PostgreSQL Docker container before starting the application.
@@ -17,17 +17,17 @@ That is, the transactional services in this project have 2 implementations, one 
 and one using jOOQ.
 
 Personally, while I do respect JPA/Hibernate as a very powerful database access standard API/library
-for Java, I am quite impressed by jOOQ. Nowadays, with (immutable) Java records (as a modern
+for Java, I am quite impressed by *jOOQ*. Nowadays, with (immutable) Java records (as a modern
 alternative to old school JavaBeans), modern SQL features, and jOOQ's type-safe and disciplined modelling
 of SQL, the case for jOOQ has become quite strong. If desired, we can combine both JPA and jOOQ
 in the same code base, of course.
 
 ## This project as a multi-module Maven project using Java Modules
 
-This is also a Maven multi-module project. This demonstrates that large code bases using Spring Boot
+This is also a *Maven multi-module project*. This demonstrates that large code bases using Spring Boot
 can very well be organized as Maven multi-module projects, even if this project itself is a small one.
 
-To go even further, this project also uses Java Modules. This enforces a chosen application architecture,
+To go even further, this project also uses *Java Modules*. This enforces a chosen application architecture,
 and uses the module path rather than the class path, to avoid circular dependencies across modules,
 "split packages", version conflicts, etc. Tests use the class path, however.
 
@@ -39,11 +39,13 @@ the Java compiler will discover and forbid this circular dependency between the 
 In all fairness, without modules Maven would detect this specific circular dependency too.
 
 If we fail to "require" a dependency that is clearly needed to compile the code, the compiler will
-discover and disallow this. This is also true if the dependency does occur on the module path.
-In my view, this enforcement of explicitly "required" dependencies is an asset, not a liability.
+discover and disallow this. This is also true if the dependency does occur (somewhere else)
+on the module path. In my view, this enforcement of explicitly "required" dependencies is an asset,
+not a liability.
 
 If the compiler encounters "split packages" (so package names occurring in multiple modules), a
 compilation error results. Such checks help avoid JAR conflicts that plague the classpath.
-Clearly, without Java Modules the occurrence of "split packages" would be ignored.
+Clearly, without Java Modules the occurrence of "split packages" would be ignored, and we would easily
+find ourselves back in the world of "class path hell".
 
 These are just a few examples of (in this case only compile-time) checks by the Java Module system.
