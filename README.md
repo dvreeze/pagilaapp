@@ -22,7 +22,7 @@ alternative to old school JavaBeans), modern SQL features, and jOOQ's type-safe 
 of SQL, the case for jOOQ has become quite strong. If desired, we can combine both JPA and jOOQ
 in the same code base, of course.
 
-## This project as a multi-module Maven projects using Java Modules
+## This project as a multi-module Maven project using Java Modules
 
 This is also a Maven multi-module project. This demonstrates that large code bases using Spring Boot
 can very well be organized as Maven multi-module projects, even if this project itself is a small one.
