@@ -31,19 +31,27 @@ import static com.tngtech.archunit.library.dependencies.SlicesRuleDefinition.sli
 
 /**
  * Unit test testing the application architecture, using <a href="https://www.archunit.org/">ArchUnit</a>.
+ * <p>
+ * Much of this is enforced in a better way (by the compiler) through the Java Modules used in this
+ * application. Also, the Java Modules not only enforce disciplined layering, but also encapsulation,
+ * minimal "public APIs" (in particular w.r.t. the service layer), etc. Moreover, the module path prevents
+ * many problems associated with the class path, which is something this ArchUnit unit test cannot do.
+ * In my view, ArchUnit unit tests are great for moving a legacy code base towards the use of Java Modules
+ * in the application, if feasible. Still, there are things ArchUnit unit tests can do that Java Modules
+ * can not, such as enforcing the use of lazy loading in JPA entities.
  *
  * @author Chris de Vreeze
  */
 @AnalyzeClasses(packages = "eu.cdevreeze.pagilaapp")
 public class ArchitectureTest {
 
-    // No cycles allowed
+    // No cycles allowed. This test adds nothing substantial to the Java Modules used in this application.
 
     @ArchTest
     public static final ArchRule noCyclesRule =
             slices().matching("eu.cdevreeze.pagilaapp.(*)..").should().beFreeOfCycles();
 
-    // Strict layering enforced
+    // Strict layering enforced. These tests add nothing substantial to the Java Modules used in this application.
 
     @ArchTest
     public static final ArchRule simpleLayeringRule =
@@ -73,7 +81,7 @@ public class ArchitectureTest {
                     .whereLayer("Entity").mayOnlyAccessLayers("Model")
                     .whereLayer("Model").mayNotAccessAnyLayer();
 
-    // Fine-grained dependency checks
+    // Fine-grained dependency checks. Much of this is enforced in a better way through the Java Modules used.
 
     @ArchTest
     public static final ArchRule jpaEntityDependentsRule =
