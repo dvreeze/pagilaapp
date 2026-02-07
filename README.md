@@ -36,11 +36,14 @@ The Java Module system really helps in catching several errors at an early stage
 Suppose we add a dependency on the "application" module to the POM file of the "domain" module, which
 is clearly a circular dependency. If we add a corresponding "requires" statement to the "domain" module descriptor,
 the Java compiler will discover and forbid this circular dependency between the 2 Java modules.
+In all fairness, without modules Maven would detect this specific circular dependency too.
 
 If we fail to "require" a dependency that is clearly needed to compile the code, the compiler will
 discover and disallow this. This is also true if the dependency does occur on the module path.
+In my view, this enforcement of explicitly "required" dependencies is an asset, not a liability.
 
 If the compiler encounters "split packages" (so package names occurring in multiple modules), a
 compilation error results. Such checks help avoid JAR conflicts that plague the classpath.
+Clearly, without Java Modules the occurrence of "split packages" would be ignored.
 
 These are just a few examples of (in this case only compile-time) checks by the Java Module system.
