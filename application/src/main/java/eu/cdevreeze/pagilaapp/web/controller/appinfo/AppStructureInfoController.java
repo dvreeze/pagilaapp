@@ -72,12 +72,11 @@ public class AppStructureInfoController {
         ObjectNode exportsJson = mapper.createObjectNode();
         exportsJson.put("isQualified", exports.isQualified());
         exportsJson.put("source", exports.source());
-        ArrayNode targetsJson = mapper.createArrayNode();
+        ArrayNode targetsJson = exportsJson.putArray("targets");
         exports.targets().forEach(targetsJson::add);
-        exportsJson.set("targets", targetsJson);
-        ArrayNode modifiersJson = mapper.createArrayNode();
+        ArrayNode modifiersJson = exportsJson.putArray("modifiers");
         exports.modifiers().forEach(mod -> modifiersJson.add(mod.name()));
-        ArrayNode accessFlagsJson = mapper.createArrayNode();
+        ArrayNode accessFlagsJson = exportsJson.putArray("accessFlags");
         exports.accessFlags().forEach(flag -> accessFlagsJson.add(flag.name()));
         return exportsJson;
     }
@@ -86,9 +85,9 @@ public class AppStructureInfoController {
         ObjectNode requiresJson = mapper.createObjectNode();
         requiresJson.put("name", requires.name());
         requires.compiledVersion().ifPresent(ver -> requiresJson.put("compiledVersion", ver.toString()));
-        ArrayNode modifiersJson = mapper.createArrayNode();
+        ArrayNode modifiersJson = requiresJson.putArray("modifiers");
         requires.modifiers().forEach(mod -> modifiersJson.add(mod.name()));
-        ArrayNode accessFlagsJson = mapper.createArrayNode();
+        ArrayNode accessFlagsJson = requiresJson.putArray("accessFlags");
         requires.accessFlags().forEach(flag -> accessFlagsJson.add(flag.name()));
         return requiresJson;
     }
