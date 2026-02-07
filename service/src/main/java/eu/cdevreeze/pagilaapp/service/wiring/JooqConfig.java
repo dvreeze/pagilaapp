@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package eu.cdevreeze.pagilaapp.wiring;
+package eu.cdevreeze.pagilaapp.service.wiring;
 
 import org.jooq.impl.DefaultConfiguration;
 import org.springframework.boot.jooq.autoconfigure.DefaultConfigurationCustomizer;

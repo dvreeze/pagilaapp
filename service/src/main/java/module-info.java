@@ -27,6 +27,7 @@ module eu.cdevreeze.pagilaapp.service {
     requires org.jooq;
     requires org.jspecify;
     requires spring.boot.autoconfigure;
+    requires spring.boot.jooq;
     requires spring.context;
     requires spring.tx;
 

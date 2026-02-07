@@ -15,11 +15,11 @@
  */
 
 /**
- * Classes that influence the "Spring wiring".
+ * Classes that influence the service layer "Spring wiring".
  *
  * @author Chris de Vreeze
  */
 @NullMarked
-package eu.cdevreeze.pagilaapp.wiring;
+package eu.cdevreeze.pagilaapp.service.wiring;
 
 import org.jspecify.annotations.NullMarked;
