@@ -21,7 +21,7 @@
  */
 module eu.cdevreeze.pagilaapp.application {
     requires com.google.common;
-    requires org.jooq;
+    requires org.jooq; // Needed by JooqConfig
     requires org.jspecify;
     requires spring.boot;
     requires spring.boot.autoconfigure;
