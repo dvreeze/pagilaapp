@@ -13,6 +13,8 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
 		<java.version>21</java.version>
+		<!-- Overriding jOOQ version from 3.19.X to 3.20.X, in order to use fetchTrimmedCharValues setting -->
+		<jooq.version>3.20.7</jooq.version>
 		<!-- See https://javadoc.io/doc/org.mockito/mockito-core/latest/org.mockito/org/mockito/Mockito.html#0.3 -->
 		<argLine/>
 	</properties>
