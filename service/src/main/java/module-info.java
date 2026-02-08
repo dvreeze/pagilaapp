@@ -27,13 +27,13 @@ module eu.cdevreeze.pagilaapp.service {
     requires org.hibernate.orm.core;
     requires org.jooq;
     requires org.jspecify;
+    requires spring.aop; // at runtime
+    requires spring.beans; // at runtime
     requires spring.boot.autoconfigure;
     requires spring.boot.jooq;
     requires spring.context;
+    requires spring.core; // at runtime
     requires spring.tx;
-
-    requires spring.core; // For org.springframework.cglib.proxy.Factory, for example
-    requires spring.aop; // For org.springframework.aop.framework.Advised, for example
 
     requires transitive eu.cdevreeze.pagilaapp.domain;
 

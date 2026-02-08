@@ -26,6 +26,7 @@ module eu.cdevreeze.pagilaapp.application {
 
     requires com.google.common;
     requires org.jspecify;
+    requires spring.aop; // at runtime
     requires spring.beans; // at runtime
     requires spring.boot;
     requires spring.boot.autoconfigure; // at runtime
