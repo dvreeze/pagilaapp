@@ -93,6 +93,13 @@ class PagilaApplicationIT {
     }
 
     @Test
+    void runsOnModulePath() {
+        assertThat(PagilaApplicationIT.class.getModule().isNamed()).isTrue();
+        assertThat(PagilaApplicationIT.class.getModule().getName()).isNotNull();
+        assertThat(PagilaApplicationIT.class.getModule().getName()).isEqualTo("eu.cdevreeze.pagilaapp.application");
+    }
+
+    @Test
     void contextLoads() {
         assertThat(addressService).isNotNull();
         assertThat(filmService).isNotNull();
