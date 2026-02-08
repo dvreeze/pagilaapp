@@ -95,18 +95,35 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
+				<version>3.5.4</version>
 				<configuration>
-					<!-- Using classpath for tests, to avoid issues with bytecode enhancement -->
-					<useModulePath>false</useModulePath>
-					<argLine>@{argLine} -javaagent:${org.mockito:mockito-core:jar}</argLine>
+					<!-- Alternatively, we could use the classpath for tests, to avoid issues with bytecode enhancement -->
+					<useModulePath>true</useModulePath>
+					<!-- See https://nipafx.dev/five-command-line-options-hack-java-module-system/ -->
+					<!-- The extra "read" of jakarta.persistence is for ArchitectureTest -->
+					<argLine>
+						@{argLine}
+						-javaagent:${org.mockito:mockito-core:jar}
+						--add-opens=java.base/java.lang=spring.core
+						--add-modules=jakarta.persistence
+						--add-reads=eu.cdevreeze.pagilaapp.application=jakarta.persistence
+					</argLine>
 				</configuration>
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-failsafe-plugin</artifactId>
+				<version>3.5.4</version>
 				<configuration>
-					<!-- Using classpath for tests, to avoid issues with bytecode enhancement -->
-					<useModulePath>false</useModulePath>
+					<!-- Alternatively, we could use the classpath for tests, to avoid issues with bytecode enhancement -->
+					<useModulePath>true</useModulePath>
+					<!-- See https://youtrack.jetbrains.com/articles/SUPPORT-A-883/How-to-resolve-java.lang.ClassFormatError-accessible-module-java.base-does-not-opens-java.lang-to-unnamed-module -->
+					<!-- See also https://nipafx.dev/five-command-line-options-hack-java-module-system/ -->
+					<argLine>
+						@{argLine}
+						--add-opens=java.base/java.lang=ALL-UNNAMED,spring.core
+						--add-opens=java.base/java.util=ALL-UNNAMED
+					</argLine>
 				</configuration>
 			</plugin>
 		</plugins>

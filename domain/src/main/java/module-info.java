@@ -21,8 +21,6 @@
  */
 module eu.cdevreeze.pagilaapp.domain {
 
-    // Simple Java Module concerning compile-time dependencies, ignoring the Spring runtime which runs on the class path.
-
     requires transitive com.google.common;
     requires transitive org.jspecify;
 

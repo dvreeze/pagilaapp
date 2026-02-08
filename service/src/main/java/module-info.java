@@ -21,8 +21,6 @@
  */
 module eu.cdevreeze.pagilaapp.service {
 
-    // Simple Java Module concerning compile-time dependencies, ignoring the Spring runtime which runs on the class path.
-
     requires com.google.common;
     requires jakarta.annotation;
     requires jakarta.persistence;
@@ -34,7 +32,15 @@ module eu.cdevreeze.pagilaapp.service {
     requires spring.context;
     requires spring.tx;
 
+    requires spring.core; // For org.springframework.cglib.proxy.Factory, for example
+    requires spring.aop; // For org.springframework.aop.framework.Advised, for example
+
     requires transitive eu.cdevreeze.pagilaapp.domain;
+
+    opens eu.cdevreeze.pagilaapp.entity to org.hibernate.orm.core;
+    opens eu.cdevreeze.pagilaapp.service.wiring to spring.core, spring.beans, spring.context, spring.aop;
+    opens eu.cdevreeze.pagilaapp.service.impl to spring.core, spring.beans, spring.context, spring.aop;
+    opens eu.cdevreeze.pagilaapp.service.jooqimpl to spring.core, spring.beans, spring.context, spring.aop;
 
     // JPA/Hibernate are internals and not exported
     // Public service API as Java interfaces

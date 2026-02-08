@@ -24,16 +24,23 @@
  */
 module eu.cdevreeze.pagilaapp.application {
 
-    // Simple Java Module concerning compile-time dependencies, ignoring the Spring runtime which runs on the class path.
-
     requires com.google.common;
     requires org.jspecify;
+    requires spring.beans; // at runtime
     requires spring.boot;
+    requires spring.boot.autoconfigure; // at runtime
     requires spring.context;
+    requires spring.core; // at runtime
+    requires spring.tx; // at runtime
     requires spring.web;
     requires tools.jackson.databind;
 
+    requires eu.cdevreeze.pagilaapp.domain;
     requires eu.cdevreeze.pagilaapp.service;
+
+    opens eu.cdevreeze.pagilaapp to spring.core, spring.beans, spring.context, spring.aop;
+    opens eu.cdevreeze.pagilaapp.web.controller to spring.core, spring.beans, spring.context, spring.aop;
+    opens eu.cdevreeze.pagilaapp.web.controller.appinfo to spring.core, spring.beans, spring.context, spring.aop;
 
     // No need to export any packages, right?
 }

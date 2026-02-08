@@ -29,9 +29,9 @@ can very well be organized as Maven multi-module projects, even if this project 
 
 To go even further, this project also uses *Java Modules*. This enforces a chosen application architecture,
 and uses the module path rather than the class path, to avoid circular dependencies across modules,
-"split packages", version conflicts, etc. Tests use the class path, however. Typically, the Spring
-application also uses the class path, keeping the module descriptors simple while still getting many
-of the benefits of Java Modules.
+"split packages", version conflicts, etc. Typically, the Spring application also uses the class path, though.
+Yet if a good set of integration tests (and unit tests) run on the module path, much has been achieved
+in benefitting from the Java Module system.
 
 The Java Module system really helps in catching several errors at an early stage.
 
