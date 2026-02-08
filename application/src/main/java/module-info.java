@@ -39,9 +39,21 @@ module eu.cdevreeze.pagilaapp.application {
     requires eu.cdevreeze.pagilaapp.domain;
     requires eu.cdevreeze.pagilaapp.service;
 
-    opens eu.cdevreeze.pagilaapp to spring.core, spring.beans, spring.context, spring.aop;
-    opens eu.cdevreeze.pagilaapp.web.controller to spring.core, spring.beans, spring.context, spring.aop;
-    opens eu.cdevreeze.pagilaapp.web.controller.appinfo to spring.core, spring.beans, spring.context, spring.aop;
+    opens eu.cdevreeze.pagilaapp to
+            spring.core,
+            spring.beans,
+            spring.context,
+            spring.aop;
+    opens eu.cdevreeze.pagilaapp.web.controller to
+            spring.core,
+            spring.beans,
+            spring.context,
+            spring.aop;
+    opens eu.cdevreeze.pagilaapp.web.controller.appinfo to
+            spring.core,
+            spring.beans,
+            spring.context,
+            spring.aop;
 
     // No need to export any packages, right?
 }

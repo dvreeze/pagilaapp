@@ -37,10 +37,23 @@ module eu.cdevreeze.pagilaapp.service {
 
     requires transitive eu.cdevreeze.pagilaapp.domain;
 
-    opens eu.cdevreeze.pagilaapp.entity to org.hibernate.orm.core;
-    opens eu.cdevreeze.pagilaapp.service.wiring to spring.core, spring.beans, spring.context, spring.aop;
-    opens eu.cdevreeze.pagilaapp.service.impl to spring.core, spring.beans, spring.context, spring.aop;
-    opens eu.cdevreeze.pagilaapp.service.jooqimpl to spring.core, spring.beans, spring.context, spring.aop;
+    opens eu.cdevreeze.pagilaapp.entity to
+            org.hibernate.orm.core;
+    opens eu.cdevreeze.pagilaapp.service.wiring to
+            spring.core,
+            spring.beans,
+            spring.context,
+            spring.aop;
+    opens eu.cdevreeze.pagilaapp.service.impl to
+            spring.core,
+            spring.beans,
+            spring.context,
+            spring.aop;
+    opens eu.cdevreeze.pagilaapp.service.jooqimpl to
+            spring.core,
+            spring.beans,
+            spring.context,
+            spring.aop;
 
     // JPA/Hibernate are internals and not exported
     // Public service API as Java interfaces
