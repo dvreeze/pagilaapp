@@ -34,6 +34,7 @@ module eu.cdevreeze.pagilaapp.application {
     requires spring.core; // at runtime
     requires spring.tx; // at runtime
     requires spring.web;
+    requires spring.webmvc; // at runtime
     requires tools.jackson.databind;
 
     requires eu.cdevreeze.pagilaapp.domain;
@@ -48,12 +49,16 @@ module eu.cdevreeze.pagilaapp.application {
             spring.core,
             spring.beans,
             spring.context,
-            spring.aop;
+            spring.aop,
+            spring.web,
+            spring.webmvc;
     opens eu.cdevreeze.pagilaapp.web.controller.appinfo to
             spring.core,
             spring.beans,
             spring.context,
-            spring.aop;
+            spring.aop,
+            spring.web,
+            spring.webmvc;
 
     // No need to export any packages, right?
 }

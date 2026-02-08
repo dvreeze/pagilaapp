@@ -38,7 +38,8 @@ module eu.cdevreeze.pagilaapp.service {
     requires transitive eu.cdevreeze.pagilaapp.domain;
 
     opens eu.cdevreeze.pagilaapp.entity to
-            org.hibernate.orm.core;
+            org.hibernate.orm.core,
+            spring.core;
     opens eu.cdevreeze.pagilaapp.service.wiring to
             spring.core,
             spring.beans,
