@@ -99,6 +99,10 @@ class PagilaApplicationIT {
         assertThat(PagilaApplicationIT.class.getModule().getName()).isEqualTo("eu.cdevreeze.pagilaapp.application");
         assertThat(FilmService.class.getModule().getName()).isEqualTo("eu.cdevreeze.pagilaapp.service");
         assertThat(Film.class.getModule().getName()).isEqualTo("eu.cdevreeze.pagilaapp.domain");
+        System.out.println("jdk.module.path: " + System.getProperty("jdk.module.path"));
+        System.out.println("jdk.module.upgrade.path: " + System.getProperty("jdk.module.upgrade.path"));
+        System.out.println("jdk.module.main: " + System.getProperty("jdk.module.main"));
+        System.out.println("jdk.module.main.class: " + System.getProperty("jdk.module.main.class"));
     }
 
     @Test
