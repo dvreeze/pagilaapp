@@ -97,6 +97,8 @@ class PagilaApplicationIT {
         assertThat(PagilaApplicationIT.class.getModule().isNamed()).isTrue();
         assertThat(PagilaApplicationIT.class.getModule().getName()).isNotNull();
         assertThat(PagilaApplicationIT.class.getModule().getName()).isEqualTo("eu.cdevreeze.pagilaapp.application");
+        assertThat(FilmService.class.getModule().getName()).isEqualTo("eu.cdevreeze.pagilaapp.service");
+        assertThat(Film.class.getModule().getName()).isEqualTo("eu.cdevreeze.pagilaapp.domain");
     }
 
     @Test
