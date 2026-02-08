@@ -30,8 +30,8 @@ can very well be organized as Maven multi-module projects, even if this project 
 To go even further, this project also uses *Java Modules*. This enforces a chosen application architecture,
 and uses the module path rather than the class path, to avoid circular dependencies across modules,
 "split packages", version conflicts, etc. Typically, the Spring application uses the class path, though.
-Yet if a good set of integration tests (and unit tests) run on the module path, much has been achieved
-in benefitting from the Java Module system.
+Yet if a good set of integration tests (and unit tests) run on the module path rather than the class path,
+much has been achieved in benefitting from the Java Module system.
 
 The Java Module system really helps in catching several errors at an early stage.
 
@@ -41,9 +41,9 @@ the Java compiler will discover and forbid this circular dependency between the 
 In all fairness, without modules Maven would detect this specific circular dependency too.
 
 If we fail to "require" a dependency that is clearly needed to compile the code, the compiler will
-discover and disallow this. This is also true if the dependency does occur (somewhere else)
-on the module path. In my view, this enforcement of explicitly "required" dependencies is an asset,
-not a liability.
+discover and disallow this. This is also true if the dependency does occur on the module path, yet
+without importing it into the module as "required" dependency. In my view, this enforcement of explicitly
+"required" dependencies is an asset, not a liability.
 
 If the compiler encounters "split packages" (so package names occurring in multiple modules), a
 compilation error results. Such checks help avoid JAR conflicts that plague the classpath.
