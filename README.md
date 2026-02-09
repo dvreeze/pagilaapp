@@ -30,7 +30,7 @@ can very well be organized as Maven multi-module projects, even if this project 
 To go even further, this project also uses *Java Modules*. This enforces a chosen application architecture,
 and ideally would use the module path rather than the class path, to avoid circular dependencies across modules,
 "split packages", (module) JAR conflicts, etc. Typically, a Spring Boot application uses the class path, though.
-This becomes clear when running "java -jar <application JAR>", and inspecting the contents of that "fat" JAR
+This becomes clear when running "java -jar my-application.JAR", and inspecting the contents of that "fat" JAR
 file, containing "Main-Class" entry "org.springframework.boot.loader.launch.JarLauncher" in the manifest file.
 Yet if a good set of integration tests (and unit tests) runs on the module path rather than the class path,
 much has already been achieved in benefitting from the Java Module system.
