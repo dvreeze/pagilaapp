@@ -28,18 +28,29 @@ This is also a *Maven multi-module project*. This demonstrates that large code b
 can very well be organized as Maven multi-module projects, even if this project itself is a small one.
 
 To go even further, this project also uses *Java Modules*. This enforces a chosen application architecture,
-and uses the module path rather than the class path, to avoid circular dependencies across modules,
-"split packages", version conflicts, etc. Typically, the Spring application uses the class path, though.
+and ideally would use the module path rather than the class path, to avoid circular dependencies across modules,
+"split packages", (module) JAR conflicts, etc. Typically, a Spring Boot application uses the class path, though.
+This becomes clear when running "java -jar <application JAR>", and inspecting the contents of that "fat" JAR
+file, containing "Main-Class" entry "org.springframework.boot.loader.launch.JarLauncher" in the manifest file.
 Yet if a good set of integration tests (and unit tests) runs on the module path rather than the class path,
-much has been achieved in benefitting from the Java Module system.
+much has already been achieved in benefitting from the Java Module system.
 
 Note that it is possible to use both module path and class path together when running an application,
 and sometimes this is the practical thing to do. For example, "infrastructure" code on the class path could
-invoke modularized application/library code on the module path. As an aside, note that Java 25 module
-imports also support that idea by offering language support for importing entire modules in a Java source
-file.
+invoke modularized application/library code on the module path. As an aside, note that Java 25 "module
+imports" also support that idea by offering language support for importing entire modules in a Java source
+file. Still, as mentioned above, a Spring Boot application typically runs as a "fat" JAR using the class path.
 
-In any case, the Java Module system really helps in catching several errors at an early stage.
+On the one hand, the Java Module system helps in organizing code and enforcing a chosen application
+architecture, by *treating Java packages as first-class citizens*. Packages can be publicly exposed by
+modules, or hidden as module implementation details. Dependencies of modules on other modules are made
+explicit. This way of looking at Java Modules mostly leans on compile-time support for modules.
+
+On the other hand, the Java Module system helps in avoiding circular dependencies, "split packages",
+conflicting module JARs, etc., both compile-time and at runtime. As said before, a Spring Boot application
+typically runs on the class path.
+
+Let's mention a few scenarios where the Java Module system helps in catching errors at an early stage.
 
 Suppose we add a dependency on the "application" module to the POM file of the "domain" module, which
 is clearly a circular dependency. If we add a corresponding "requires" statement to the "domain" module descriptor,
@@ -57,3 +68,15 @@ Clearly, without Java Modules the occurrence of "split packages" would be ignore
 find ourselves back in the world of "class path hell".
 
 These are just a few examples of (in this case only compile-time) checks by the Java Module system.
+
+Note that dependencies are both described in Maven POM files and Java Modules. They represent different
+perspectives on dependencies, and should not contradict each other. Java Modules know nothing about
+dependency versions or Maven coordinates, whereas Maven does not describe modules and their dependencies
+using Java language features.
+
+Obviously, Java Modules describe required modules ("inputs") and exported packages ("outputs").
+Furthermore, they may also be "context-aware", in the sense that specific packages are opened or
+exported to specific modules. The extent to which this is done may depend on the "role" of the module.
+Is it a module to be used anywhere, without making any assumptions about its context? Or is it a module
+that is used in a specific context, such as a Spring application? Libraries are different from application
+modules in this respect.
