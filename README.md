@@ -33,7 +33,13 @@ and uses the module path rather than the class path, to avoid circular dependenc
 Yet if a good set of integration tests (and unit tests) run on the module path rather than the class path,
 much has been achieved in benefitting from the Java Module system.
 
-The Java Module system really helps in catching several errors at an early stage.
+Note that it is possible to use both module path and class path together when running an application,
+and sometimes this is the practical thing to do. For example, "infrastructure" code on the class path could
+invoke modularized application/library code on the module path. As an aside, note that Java 25 module
+imports also support that idea by offering language support for importing entire modules in a Java source
+file.
+
+In any case, the Java Module system really helps in catching several errors at an early stage.
 
 Suppose we add a dependency on the "application" module to the POM file of the "domain" module, which
 is clearly a circular dependency. If we add a corresponding "requires" statement to the "domain" module descriptor,
