@@ -29,6 +29,8 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
 import org.hibernate.internal.StatelessSessionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +51,8 @@ public class DefaultCustomerService implements CustomerService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
+    private static final Logger logger = LoggerFactory.getLogger(DefaultCustomerService.class);
+
     // Shared thread-safe proxy for the actual transactional EntityAgent that differs for each transaction
     @PersistenceAgent
     private final EntityAgent entityAgent;
@@ -61,7 +65,7 @@ public class DefaultCustomerService implements CustomerService {
     @Transactional(readOnly = true)
     public ImmutableList<Customer> findAllCustomers() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
+        logger.debug("Hibernate StatelessSessionImpl: {}", entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityAgent.getCriteriaBuilder();

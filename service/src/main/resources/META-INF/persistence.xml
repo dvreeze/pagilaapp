@@ -1,4 +1,4 @@
-<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="3.1">
+<persistence xmlns="https://jakarta.ee/xml/ns/persistence" version="4.0">
     <persistence-unit name="pagila" transaction-type="RESOURCE_LOCAL">
         <description>DVD Rental</description>
         <class>eu.cdevreeze.pagilaapp.entity.ActorEntity</class>
@@ -12,8 +12,8 @@
         <class>eu.cdevreeze.pagilaapp.entity.StaffEntity</class>
         <class>eu.cdevreeze.pagilaapp.entity.StoreEntity</class>
         <exclude-unlisted-classes>true</exclude-unlisted-classes>
+        <default-to-one-fetch-type>LAZY</default-to-one-fetch-type>
         <properties>
-            <!-- Left empty. See https://jakarta.ee/specifications/persistence/3.2/jakarta-persistence-spec-3.2#a12384. -->
         </properties>
     </persistence-unit>
 </persistence>

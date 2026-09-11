@@ -28,6 +28,8 @@ import jakarta.persistence.EntityGraph;
 import jakarta.persistence.PersistenceAgent;
 import jakarta.persistence.criteria.*;
 import org.hibernate.internal.StatelessSessionImpl;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,6 +51,8 @@ public class DefaultFilmService implements FilmService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
+    private static final Logger logger = LoggerFactory.getLogger(DefaultFilmService.class);
+
     // Shared thread-safe proxy for the actual transactional EntityAgent that differs for each transaction
     @PersistenceAgent
     private final EntityAgent entityAgent;
@@ -61,7 +65,7 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findAllFilms() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
+        logger.debug("Hibernate StatelessSessionImpl: {}", entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
@@ -91,7 +95,7 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByLanguage(String language) {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
+        logger.debug("Hibernate StatelessSessionImpl: {}", entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
@@ -136,7 +140,7 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories) {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
+        logger.debug("Hibernate StatelessSessionImpl: {}", entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
@@ -174,7 +178,7 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByActor(String firstName, String lastName) {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
+        logger.debug("Hibernate StatelessSessionImpl: {}", entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
         CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
@@ -219,7 +223,7 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableSet<String> findAllFilmCategories() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
+        logger.debug("Hibernate StatelessSessionImpl: {}", entityAgent.unwrap(StatelessSessionImpl.class));
 
         CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<String> cq = cb.createQuery(String.class);

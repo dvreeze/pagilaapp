@@ -27,6 +27,7 @@ module eu.cdevreeze.pagilaapp.service {
     requires org.hibernate.orm.core;
     requires org.jooq;
     requires org.jspecify;
+    requires org.slf4j;
     requires spring.aop; // at runtime
     requires spring.beans; // at runtime
     requires spring.boot.autoconfigure;

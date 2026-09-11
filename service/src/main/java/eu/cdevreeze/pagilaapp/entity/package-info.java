@@ -33,7 +33,7 @@
  * SQL, while avoiding the N + 1 problem.
  * <p>
  * Indeed, JPQL can be seen conceptually as an object-oriented SQL dialect, making it more pleasant
- * to access the database from Java code. Joins are witten as "path navigation", and result sets are
+ * to access the database from Java code. Joins are written as "path navigation", and result sets are
  * "automatically" converted to nested entity object graphs (especially when using entity graphs).
  * <p>
  * Also note that our criteria queries allow us to work with the database in a fully type-safe way.
