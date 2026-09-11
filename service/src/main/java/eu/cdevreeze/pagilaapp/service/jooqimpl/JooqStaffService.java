@@ -70,16 +70,16 @@ public class JooqStaffService implements StaffService {
             );
 
             return new Staff(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     firstName,
                     lastName,
                     address.toModel(),
-                    Optional.ofNullable(email),
+                    email,
                     store.toModel(),
                     isActive,
                     userName,
-                    Optional.ofNullable(password),
-                    pictureOption
+                    password,
+                    pictureOption.orElse(null)
             );
         }
     }

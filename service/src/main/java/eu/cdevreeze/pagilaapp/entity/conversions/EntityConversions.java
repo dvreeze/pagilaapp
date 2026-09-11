@@ -43,11 +43,11 @@ public class EntityConversions {
 
     public static Customer convertCustomerEntityToModel(CustomerEntity customerEntity) {
         return new Customer(
-                Stream.ofNullable(customerEntity.getId()).mapToInt(i -> i).findFirst(),
+                customerEntity.getId(),
                 convertStoreEntityToModel(customerEntity.getStore()),
                 customerEntity.getFirstName(),
                 customerEntity.getLastName(),
-                Optional.ofNullable(customerEntity.getEmail()),
+                customerEntity.getEmail(),
                 convertAddressEntityToModel(customerEntity.getAddress()),
                 Optional.ofNullable(customerEntity.getActive()).stream().anyMatch(v -> v == 1),
                 customerEntity.getCreateDate()
@@ -64,41 +64,41 @@ public class EntityConversions {
         );
 
         return new Staff(
-                Stream.ofNullable(staffEntity.getId()).mapToInt(i -> i).findFirst(),
+                staffEntity.getId(),
                 staffEntity.getFirstName(),
                 staffEntity.getLastName(),
                 convertAddressEntityToModel(staffEntity.getAddress()),
-                Optional.ofNullable(staffEntity.getEmail()),
+                staffEntity.getEmail(),
                 convertStoreEntityToModel(staffEntity.getStore()),
                 staffEntity.getActive(),
                 staffEntity.getUserName(),
-                Optional.ofNullable(staffEntity.getPassword()),
-                pictureOption
+                staffEntity.getPassword(),
+                pictureOption.orElse(null)
         );
     }
 
     public static Store convertStoreEntityToModel(StoreEntity storeEntity) {
         return new Store(
-                Stream.ofNullable(storeEntity.getId()).mapToInt(i -> i).findFirst(),
+                storeEntity.getId(),
                 convertAddressEntityToModel(storeEntity.getAddress())
         );
     }
 
     public static Address convertAddressEntityToModel(AddressEntity addressEntity) {
         return new Address(
-                Stream.ofNullable(addressEntity.getId()).mapToInt(i -> i).findFirst(),
+                addressEntity.getId(),
                 addressEntity.getAddress(),
-                Optional.ofNullable(addressEntity.getAddress2()),
+                addressEntity.getAddress2(),
                 addressEntity.getDistrict(),
                 convertCityEntityToModel(addressEntity.getCity()),
-                Optional.ofNullable(addressEntity.getPostalCode()),
+                addressEntity.getPostalCode(),
                 addressEntity.getPhone()
         );
     }
 
     public static City convertCityEntityToModel(CityEntity cityEntity) {
         return new City(
-                Stream.ofNullable(cityEntity.getId()).mapToInt(i -> i).findFirst(),
+                cityEntity.getId(),
                 cityEntity.getCity(),
                 cityEntity.getCountry().getCountry()
         );
@@ -106,12 +106,12 @@ public class EntityConversions {
 
     public static Film convertFilmEntityToModel(FilmEntity filmEntity) {
         return new Film(
-                Stream.ofNullable(filmEntity.getId()).mapToInt(i -> i).findFirst(),
+                filmEntity.getId(),
                 filmEntity.getTitle(),
-                Optional.ofNullable(filmEntity.getDescription()),
-                Optional.ofNullable(filmEntity.getReleaseYear()),
+                filmEntity.getDescription(),
+                filmEntity.getReleaseYear(),
                 filmEntity.getLanguage().getRawName().strip(),
-                Optional.ofNullable(filmEntity.getOriginalLanguage()).map(LanguageEntity::getRawName).map(String::strip),
+                Optional.ofNullable(filmEntity.getOriginalLanguage()).map(LanguageEntity::getRawName).map(String::strip).orElse(null),
                 filmEntity.getCategories()
                         .stream()
                         .map(EntityConversions::convertCategoryEntityToModel)
@@ -122,19 +122,20 @@ public class EntityConversions {
                         .collect(ImmutableSet.toImmutableSet()),
                 filmEntity.getRentalDuration(),
                 filmEntity.getRentalRate(),
-                Stream.ofNullable(filmEntity.getLength()).mapToInt(i -> i).findFirst(),
+                Stream.ofNullable(filmEntity.getLength()).map(Integer::valueOf).findFirst().orElse(null),
                 filmEntity.getReplacementCost(),
-                Optional.ofNullable(filmEntity.getRating()),
+                filmEntity.getRating(),
                 Optional.ofNullable(filmEntity.getSpecialFeatures())
                         .map(specFeatures ->
                                 specFeatures.stream().collect(ImmutableSet.toImmutableSet())
                         )
+                        .orElse(null)
         );
     }
 
     public static Actor convertActorEntityToModel(ActorEntity actorEntity) {
         return new Actor(
-                Stream.ofNullable(actorEntity.getId()).mapToInt(i -> i).findFirst(),
+                actorEntity.getId(),
                 actorEntity.getFirstName(),
                 actorEntity.getLastName()
         );
@@ -142,7 +143,7 @@ public class EntityConversions {
 
     public static Category convertCategoryEntityToModel(CategoryEntity categoryEntity) {
         return new Category(
-                Stream.ofNullable(categoryEntity.getId()).mapToInt(i -> i).findFirst(),
+                categoryEntity.getId(),
                 categoryEntity.getName()
         );
     }

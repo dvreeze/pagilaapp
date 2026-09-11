@@ -66,7 +66,7 @@ public class JooqFilmService implements FilmService {
 
         public Category toModel() {
             return new Category(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     name
             );
         }
@@ -80,7 +80,7 @@ public class JooqFilmService implements FilmService {
 
         public Actor toModel() {
             return new Actor(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     firstName,
                     lastName
             );
@@ -106,20 +106,20 @@ public class JooqFilmService implements FilmService {
 
         public Film toModel() {
             return new Film(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     title,
-                    Optional.ofNullable(description),
-                    Optional.ofNullable(releaseYear).map(Year::of),
+                    description,
+                    Optional.ofNullable(releaseYear).map(Year::of).orElse(null),
                     language,
-                    Optional.ofNullable(originalLanguage),
+                    originalLanguage,
                     categories.stream().map(CategoryRow::toModel).collect(ImmutableSet.toImmutableSet()),
                     actors.stream().map(ActorRow::toModel).collect(ImmutableSet.toImmutableSet()),
                     rentalDuration,
                     rentalRate,
-                    Optional.ofNullable(length).stream().mapToInt(i -> i).findFirst(),
+                    Optional.ofNullable(length).stream().map(Integer::valueOf).findFirst().orElse(null),
                     replacementCost,
-                    Optional.ofNullable(rating).map(MpaaRating::toString),
-                    Optional.of(specialFeatures).map(Arrays::asList).filter(v -> !v.isEmpty()).map(ImmutableSet::copyOf)
+                    Optional.ofNullable(rating).map(MpaaRating::toString).orElse(null),
+                    Optional.of(specialFeatures).map(Arrays::asList).filter(v -> !v.isEmpty()).map(ImmutableSet::copyOf).orElse(null)
             );
         }
     }

@@ -21,8 +21,6 @@ import eu.cdevreeze.pagilaapp.model.City;
 import eu.cdevreeze.pagilaapp.model.Store;
 import org.jspecify.annotations.Nullable;
 
-import java.util.Optional;
-
 /**
  * Shared result set row classes.
  *
@@ -41,7 +39,7 @@ class ResultRows {
 
         public City toModel() {
             return new City(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     city,
                     country
             );
@@ -60,12 +58,12 @@ class ResultRows {
 
         public Address toModel() {
             return new Address(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     address,
-                    Optional.ofNullable(address2),
+                    address2,
                     district,
                     city.toModel(),
-                    Optional.ofNullable(postalCode),
+                    postalCode,
                     phone
             );
         }
@@ -78,7 +76,7 @@ class ResultRows {
 
         public Store toModel() {
             return new Store(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     address.toModel()
             );
         }

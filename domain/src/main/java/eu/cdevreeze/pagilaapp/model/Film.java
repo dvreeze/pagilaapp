@@ -17,6 +17,7 @@
 package eu.cdevreeze.pagilaapp.model;
 
 import com.google.common.collect.ImmutableSet;
+import org.jspecify.annotations.Nullable;
 
 import java.math.BigDecimal;
 import java.time.Year;
@@ -29,21 +30,49 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record Film(
-        OptionalInt idOption,
+        @Nullable Integer id,
         String title,
-        Optional<String> descriptionOption,
-        Optional<Year> releaseYearOption,
+        @Nullable String description,
+        @Nullable Year releaseYear,
         String language,
-        Optional<String> originalLanguageOption,
+        @Nullable String originalLanguage,
         ImmutableSet<Category> categories,
         ImmutableSet<Actor> actors,
         short rentalDuration,
         BigDecimal rentalRate,
-        OptionalInt lengthOption,
+        @Nullable Integer length,
         BigDecimal replacementCost,
-        Optional<String> ratingOption,
-        Optional<ImmutableSet<String>> specialFeaturesOption
+        @Nullable String rating,
+        @Nullable ImmutableSet<String> specialFeatures
 ) {
+
+    public OptionalInt idOption() {
+        return id == null ? OptionalInt.empty() : OptionalInt.of(id);
+    }
+
+    public Optional<String> descriptionOption() {
+        return Optional.ofNullable(description);
+    }
+
+    public Optional<Year> releaseYearOption() {
+        return Optional.ofNullable(releaseYear);
+    }
+
+    public Optional<String> originalLanguageOption() {
+        return Optional.ofNullable(originalLanguage);
+    }
+
+    public OptionalInt lengthOption() {
+        return length == null ? OptionalInt.empty() : OptionalInt.of(length);
+    }
+
+    public Optional<String> ratingOption() {
+        return Optional.ofNullable(rating);
+    }
+
+    public Optional<ImmutableSet<String>> specialFeaturesOption() {
+        return Optional.ofNullable(specialFeatures);
+    }
 
     public ImmutableSet<String> actorNames() {
         return actors().stream().map(Actor::name).collect(ImmutableSet.toImmutableSet());
@@ -51,39 +80,39 @@ public record Film(
 
     public Film withActors(ImmutableSet<Actor> actors) {
         return new Film(
-                idOption(),
+                id(),
                 title(),
-                descriptionOption(),
-                releaseYearOption(),
+                description(),
+                releaseYear(),
                 language(),
-                originalLanguageOption(),
+                originalLanguage(),
                 categories(),
                 actors,
                 rentalDuration(),
                 rentalRate(),
-                lengthOption(),
+                length(),
                 replacementCost(),
-                ratingOption(),
-                specialFeaturesOption()
+                rating(),
+                specialFeatures()
         );
     }
 
     public Film withCategories(ImmutableSet<Category> categories) {
         return new Film(
-                idOption(),
+                id(),
                 title(),
-                descriptionOption(),
-                releaseYearOption(),
+                description(),
+                releaseYear(),
                 language(),
-                originalLanguageOption(),
+                originalLanguage(),
                 categories,
                 actors(),
                 rentalDuration(),
                 rentalRate(),
-                lengthOption(),
+                length(),
                 replacementCost(),
-                ratingOption(),
-                specialFeaturesOption()
+                rating(),
+                specialFeatures()
         );
     }
 }

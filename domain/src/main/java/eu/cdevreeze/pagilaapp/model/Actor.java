@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.OptionalInt;
 
 /**
@@ -24,10 +26,14 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record Actor(
-        OptionalInt idOption,
+        @Nullable Integer id,
         String firstName,
         String lastName
 ) {
+
+    public OptionalInt idOption() {
+        return id == null ? OptionalInt.empty() : OptionalInt.of(id);
+    }
 
     public String name() {
         return String.format("%s %s", firstName(), lastName());

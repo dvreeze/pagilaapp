@@ -59,11 +59,11 @@ public class JooqCustomerService implements CustomerService {
 
         public Customer toModel() {
             return new Customer(
-                    Optional.ofNullable(id).stream().mapToInt(i -> i).findFirst(),
+                    id,
                     store.toModel(),
                     firstName,
                     lastName,
-                    Optional.ofNullable(email),
+                    email,
                     address.toModel(),
                     Optional.ofNullable(isActive).stream().anyMatch(b -> b == 1),
                     createDate

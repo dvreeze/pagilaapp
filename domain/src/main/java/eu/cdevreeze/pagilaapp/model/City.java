@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.util.OptionalInt;
 
 /**
@@ -24,8 +26,12 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record City(
-        OptionalInt idOption,
+        @Nullable Integer id,
         String city,
         String country
 ) {
+
+    public OptionalInt idOption() {
+        return id == null ? OptionalInt.empty() : OptionalInt.of(id);
+    }
 }

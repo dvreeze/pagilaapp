@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.model;
 
+import org.jspecify.annotations.Nullable;
+
 import java.time.LocalDate;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -26,13 +28,21 @@ import java.util.OptionalInt;
  * @author Chris de Vreeze
  */
 public record Customer(
-        OptionalInt idOption,
+        @Nullable Integer id,
         Store store,
         String firstName,
         String lastName,
-        Optional<String> emailOption,
+        @Nullable String email,
         Address address,
         boolean isActive,
         LocalDate createDate
 ) {
+
+    public OptionalInt idOption() {
+        return id == null ? OptionalInt.empty() : OptionalInt.of(id);
+    }
+
+    public Optional<String> emailOption() {
+        return Optional.ofNullable(email);
+    }
 }

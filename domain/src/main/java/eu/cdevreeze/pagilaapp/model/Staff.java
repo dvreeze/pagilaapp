@@ -17,6 +17,7 @@
 package eu.cdevreeze.pagilaapp.model;
 
 import com.google.common.primitives.ImmutableIntArray;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -28,17 +29,33 @@ import java.util.stream.IntStream;
  * @author Chris de Vreeze
  */
 public record Staff(
-        OptionalInt idOption,
+        @Nullable Integer id,
         String firstName,
         String lastName,
         Address address,
-        Optional<String> emailOption,
+        @Nullable String email,
         Store store,
         boolean isActive,
         String userName,
-        Optional<String> passwordOption,
-        Optional<ImmutableIntArray> pictureOption // immutable, but not memory-efficient compared to byte[]
+        @Nullable String password,
+        @Nullable ImmutableIntArray picture // immutable, but not memory-efficient compared to byte[]
 ) {
+
+    public OptionalInt idOption() {
+        return id == null ? OptionalInt.empty() : OptionalInt.of(id);
+    }
+
+    public Optional<String> emailOption() {
+        return Optional.ofNullable(email);
+    }
+
+    public Optional<String> passwordOption() {
+        return Optional.ofNullable(password);
+    }
+
+    public Optional<ImmutableIntArray> pictureOption() {
+        return Optional.ofNullable(picture);
+    }
 
     public Optional<byte[]> pictureAsOptionalByteArray() {
         return pictureOption().map(pic -> {
