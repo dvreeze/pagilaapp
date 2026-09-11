@@ -16,9 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.entity;
 
+import module java.base;
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
 
 /**
  * Customer JPA entity. Each instance represents a row in the corresponding table.

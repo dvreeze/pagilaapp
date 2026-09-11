@@ -16,13 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.entity;
 
+import module java.base;
 import jakarta.persistence.*;
-
-import java.math.BigDecimal;
-import java.time.Year;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Film JPA entity. Each instance represents a row in the corresponding table.

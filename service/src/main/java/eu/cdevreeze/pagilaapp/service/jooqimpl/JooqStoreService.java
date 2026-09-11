@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
+import module java.base;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.model.Store;
 import eu.cdevreeze.pagilaapp.service.api.StoreService;
@@ -24,8 +25,6 @@ import org.jooq.Records;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
 
 import static eu.cdevreeze.pagilaapp.jooq.Tables.STORE;
 import static eu.cdevreeze.pagilaapp.jooq.tables.Address.ADDRESS;

@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
+import module java.base;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.model.Customer;
 import eu.cdevreeze.pagilaapp.service.api.CustomerService;
@@ -25,10 +26,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
-import java.util.Objects;
-import java.util.Optional;
 
 import static eu.cdevreeze.pagilaapp.jooq.Tables.CUSTOMER;
 import static eu.cdevreeze.pagilaapp.jooq.Tables.STORE;

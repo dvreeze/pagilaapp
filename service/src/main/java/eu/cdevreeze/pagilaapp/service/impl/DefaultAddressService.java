@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.service.impl;
 
+import module jakarta.persistence;
+import module java.base;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.AddressEntity;
@@ -24,12 +26,6 @@ import eu.cdevreeze.pagilaapp.entity.CityEntity_;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Address;
 import eu.cdevreeze.pagilaapp.service.api.AddressService;
-import jakarta.persistence.EntityAgent;
-import jakarta.persistence.EntityGraph;
-import jakarta.persistence.PersistenceAgent;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import org.hibernate.internal.StatelessSessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +33,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import java.util.Comparator;
 
 /**
  * Default AddressService implementation.

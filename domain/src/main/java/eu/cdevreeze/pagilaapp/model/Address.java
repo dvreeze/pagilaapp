@@ -16,10 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.model;
 
+import module java.base;
 import org.jspecify.annotations.Nullable;
-
-import java.util.Optional;
-import java.util.OptionalInt;
 
 /**
  * Immutable address record. The ID, if any, is the technical primary key.

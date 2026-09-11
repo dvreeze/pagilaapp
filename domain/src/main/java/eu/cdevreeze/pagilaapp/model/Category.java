@@ -16,9 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.model;
 
+import module java.base;
 import org.jspecify.annotations.Nullable;
-
-import java.util.OptionalInt;
 
 /**
  * Immutable category record. The ID, if any, is the technical primary key.

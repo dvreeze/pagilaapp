@@ -16,12 +16,9 @@
 
 package eu.cdevreeze.pagilaapp.model;
 
+import module java.base;
 import com.google.common.primitives.ImmutableIntArray;
 import org.jspecify.annotations.Nullable;
-
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.stream.IntStream;
 
 /**
  * Immutable staff record. The ID, if any, is the technical primary key.

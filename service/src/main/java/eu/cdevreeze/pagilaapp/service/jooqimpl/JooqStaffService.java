@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
+import module java.base;
 import com.google.common.collect.ImmutableList;
 import com.google.common.primitives.ImmutableIntArray;
 import eu.cdevreeze.pagilaapp.model.Staff;
@@ -26,10 +27,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.IntStream;
 
 import static eu.cdevreeze.pagilaapp.jooq.Tables.STAFF;
 import static eu.cdevreeze.pagilaapp.jooq.Tables.STORE;

@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.service.jooqimpl;
 
+import module java.base;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
@@ -33,13 +34,6 @@ import org.jspecify.annotations.Nullable;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.Year;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
 
 import static eu.cdevreeze.pagilaapp.jooq.Tables.*;
 import static org.jooq.impl.DSL.*;

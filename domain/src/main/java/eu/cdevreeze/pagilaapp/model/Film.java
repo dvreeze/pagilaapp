@@ -16,13 +16,9 @@
 
 package eu.cdevreeze.pagilaapp.model;
 
+import module java.base;
 import com.google.common.collect.ImmutableSet;
 import org.jspecify.annotations.Nullable;
-
-import java.math.BigDecimal;
-import java.time.Year;
-import java.util.Optional;
-import java.util.OptionalInt;
 
 /**
  * Immutable film record. The ID, if any, is the technical primary key.

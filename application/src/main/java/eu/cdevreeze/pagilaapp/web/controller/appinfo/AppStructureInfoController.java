@@ -16,6 +16,7 @@
 
 package eu.cdevreeze.pagilaapp.web.controller.appinfo;
 
+import module java.base;
 import com.google.common.base.Preconditions;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +25,6 @@ import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 import tools.jackson.databind.node.ArrayNode;
 import tools.jackson.databind.node.ObjectNode;
-
-import java.lang.module.ModuleDescriptor;
-import java.util.Objects;
 
 /**
  * Web MVC controller for outputting the internal application structure in terms of Java Modules as JSON.

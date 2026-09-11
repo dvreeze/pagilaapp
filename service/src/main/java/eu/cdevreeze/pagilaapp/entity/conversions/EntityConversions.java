@@ -16,15 +16,11 @@
 
 package eu.cdevreeze.pagilaapp.entity.conversions;
 
+import module java.base;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.primitives.ImmutableIntArray;
 import eu.cdevreeze.pagilaapp.entity.*;
 import eu.cdevreeze.pagilaapp.model.*;
-
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 /**
  * Conversions from entities to model objects.

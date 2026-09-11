@@ -16,6 +16,8 @@
 
 package eu.cdevreeze.pagilaapp.service.impl;
 
+import module jakarta.persistence;
+import module java.base;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.AddressEntity_;
@@ -25,12 +27,6 @@ import eu.cdevreeze.pagilaapp.entity.StoreEntity_;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Store;
 import eu.cdevreeze.pagilaapp.service.api.StoreService;
-import jakarta.persistence.EntityAgent;
-import jakarta.persistence.EntityGraph;
-import jakarta.persistence.PersistenceAgent;
-import jakarta.persistence.criteria.CriteriaBuilder;
-import jakarta.persistence.criteria.CriteriaQuery;
-import jakarta.persistence.criteria.Root;
 import org.hibernate.internal.StatelessSessionImpl;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,8 +34,6 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProp
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-
-import java.util.Comparator;
 
 /**
  * Default StoreService implementation.
