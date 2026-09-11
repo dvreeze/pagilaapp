@@ -23,11 +23,11 @@ import eu.cdevreeze.pagilaapp.entity.*;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Film;
 import eu.cdevreeze.pagilaapp.service.api.FilmService;
+import jakarta.persistence.EntityAgent;
 import jakarta.persistence.EntityGraph;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceAgent;
 import jakarta.persistence.criteria.*;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.internal.StatelessSessionImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -49,22 +49,22 @@ public class DefaultFilmService implements FilmService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
-    // Shared thread-safe proxy for the actual transactional EntityManager that differs for each transaction
-    @PersistenceContext
-    private final EntityManager entityManager;
+    // Shared thread-safe proxy for the actual transactional EntityAgent that differs for each transaction
+    @PersistenceAgent
+    private final EntityAgent entityAgent;
 
-    public DefaultFilmService(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public DefaultFilmService(EntityAgent entityAgent) {
+        this.entityAgent = entityAgent;
     }
 
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Film> findAllFilms() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
@@ -75,10 +75,10 @@ public class DefaultFilmService implements FilmService {
         EntityGraph<FilmEntity> filmGraph = createEntityGraph();
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
+        // Note that JPA entities do not escape the stateless session
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultList()
                 .stream()
@@ -91,10 +91,10 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByLanguage(String language) {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
@@ -114,10 +114,10 @@ public class DefaultFilmService implements FilmService {
         EntityGraph<FilmEntity> filmGraph = createEntityGraph();
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
+        // Note that JPA entities do not escape the stateless session
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultList()
                 .stream()
@@ -136,10 +136,10 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByCategories(ImmutableSet<String> categories) {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
@@ -158,10 +158,10 @@ public class DefaultFilmService implements FilmService {
         EntityGraph<FilmEntity> filmGraph = createEntityGraph();
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
+        // Note that JPA entities do not escape the stateless session
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultList()
                 .stream()
@@ -174,10 +174,10 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableList<Film> findFilmsByActor(String firstName, String lastName) {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<FilmEntity> cq = cb.createQuery(FilmEntity.class);
 
         Root<FilmEntity> filmRoot = cq.from(FilmEntity.class);
@@ -203,10 +203,10 @@ public class DefaultFilmService implements FilmService {
         EntityGraph<FilmEntity> filmGraph = createEntityGraph();
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
+        // Note that JPA entities do not escape the stateless session
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, filmGraph)
                 .getResultList()
                 .stream()
@@ -219,26 +219,25 @@ public class DefaultFilmService implements FilmService {
     @Transactional(readOnly = true)
     public ImmutableSet<String> findAllFilmCategories() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<String> cq = cb.createQuery(String.class);
 
         Root<CategoryEntity> categoryRoot = cq.from(CategoryEntity.class);
         cq.select(categoryRoot.get(CategoryEntity_.name));
 
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .getResultStream()
                 .collect(ImmutableSet.toImmutableSet());
     }
 
     private EntityGraph<FilmEntity> createEntityGraph() {
-        EntityGraph<FilmEntity> filmGraph = entityManager.createEntityGraph(FilmEntity.class);
+        EntityGraph<FilmEntity> filmGraph = entityAgent.createEntityGraph(FilmEntity.class);
         filmGraph.addAttributeNode(FilmEntity_.language);
         filmGraph.addAttributeNode(FilmEntity_.originalLanguage);
 
         filmGraph.addAttributeNode(FilmEntity_.categories);
-
         filmGraph.addAttributeNode(FilmEntity_.actors);
         return filmGraph;
     }

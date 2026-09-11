@@ -20,19 +20,17 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import eu.cdevreeze.pagilaapp.entity.AddressEntity;
 import eu.cdevreeze.pagilaapp.entity.AddressEntity_;
-import eu.cdevreeze.pagilaapp.entity.CityEntity;
 import eu.cdevreeze.pagilaapp.entity.CityEntity_;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Address;
 import eu.cdevreeze.pagilaapp.service.api.AddressService;
+import jakarta.persistence.EntityAgent;
 import jakarta.persistence.EntityGraph;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Subgraph;
+import jakarta.persistence.PersistenceAgent;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.internal.StatelessSessionImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -53,22 +51,22 @@ public class DefaultAddressService implements AddressService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
-    // Shared thread-safe proxy for the actual transactional EntityManager that differs for each transaction
-    @PersistenceContext
-    private final EntityManager entityManager;
+    // Shared thread-safe proxy for the actual transactional EntityAgent that differs for each transaction
+    @PersistenceAgent
+    private final EntityAgent entityAgent;
 
-    public DefaultAddressService(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public DefaultAddressService(EntityAgent entityAgent) {
+        this.entityAgent = entityAgent;
     }
 
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Address> findAllAddresses() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<AddressEntity> cq = cb.createQuery(AddressEntity.class);
 
         Root<AddressEntity> addressRoot = cq.from(AddressEntity.class);
@@ -76,16 +74,14 @@ public class DefaultAddressService implements AddressService {
 
         // Next build up the entity graph, to specify which associated data should be fetched
         // At the same time, this helps achieve good performance, by solving the N + 1 problem
-        EntityGraph<AddressEntity> addressGraph = entityManager.createEntityGraph(AddressEntity.class);
-        addressGraph.addAttributeNode(AddressEntity_.city);
-        Subgraph<CityEntity> citySubgraph = addressGraph.addSubgraph(AddressEntity_.city);
-        citySubgraph.addAttributeNode(CityEntity_.country);
+        EntityGraph<AddressEntity> addressGraph = entityAgent.createEntityGraph(AddressEntity.class);
+        addressGraph.addSubgraph(AddressEntity_.city).addAttributeNode(CityEntity_.country);
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
+        // Note that JPA entities do not escape the stateless session
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, addressGraph)
                 .getResultList()
                 .stream()

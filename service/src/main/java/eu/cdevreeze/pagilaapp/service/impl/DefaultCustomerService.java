@@ -22,14 +22,13 @@ import eu.cdevreeze.pagilaapp.entity.*;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Customer;
 import eu.cdevreeze.pagilaapp.service.api.CustomerService;
+import jakarta.persistence.EntityAgent;
 import jakarta.persistence.EntityGraph;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Subgraph;
+import jakarta.persistence.PersistenceAgent;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.internal.StatelessSessionImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,22 +49,22 @@ public class DefaultCustomerService implements CustomerService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
-    // Shared thread-safe proxy for the actual transactional EntityManager that differs for each transaction
-    @PersistenceContext
-    private final EntityManager entityManager;
+    // Shared thread-safe proxy for the actual transactional EntityAgent that differs for each transaction
+    @PersistenceAgent
+    private final EntityAgent entityAgent;
 
-    public DefaultCustomerService(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public DefaultCustomerService(EntityAgent entityAgent) {
+        this.entityAgent = entityAgent;
     }
 
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Customer> findAllCustomers() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<CustomerEntity> cq = cb.createQuery(CustomerEntity.class);
 
         Root<CustomerEntity> customerRoot = cq.from(CustomerEntity.class);
@@ -76,10 +75,10 @@ public class DefaultCustomerService implements CustomerService {
         EntityGraph<CustomerEntity> customerGraph = createEntityGraph();
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
+        // Note that JPA entities do not escape the stateless session
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, customerGraph)
                 .getResultList()
                 .stream()
@@ -89,26 +88,14 @@ public class DefaultCustomerService implements CustomerService {
     }
 
     private EntityGraph<CustomerEntity> createEntityGraph() {
-        EntityGraph<CustomerEntity> customerGraph = entityManager.createEntityGraph(CustomerEntity.class);
+        EntityGraph<CustomerEntity> customerGraph = entityAgent.createEntityGraph(CustomerEntity.class);
 
-        customerGraph.addAttributeNode(CustomerEntity_.store);
-        Subgraph<StoreEntity> storeSubgraph = customerGraph.addSubgraph(CustomerEntity_.store);
+        customerGraph.addSubgraph(CustomerEntity_.store)
+                .addSubgraph(StoreEntity_.address)
+                .addSubgraph(AddressEntity_.city)
+                .addAttributeNode(CityEntity_.country);
 
-        storeSubgraph.addAttributeNode(StoreEntity_.address);
-        Subgraph<AddressEntity> storeAddressSubgraph = storeSubgraph.addSubgraph(StoreEntity_.address);
-
-        storeAddressSubgraph.addAttributeNode(AddressEntity_.city);
-        Subgraph<CityEntity> storeCitySubgraph = storeAddressSubgraph.addSubgraph(AddressEntity_.city);
-
-        storeCitySubgraph.addAttributeNode(CityEntity_.country);
-
-        customerGraph.addAttributeNode(CustomerEntity_.address);
-        Subgraph<AddressEntity> addressSubgraph = customerGraph.addSubgraph(CustomerEntity_.address);
-
-        addressSubgraph.addAttributeNode(AddressEntity_.city);
-        Subgraph<CityEntity> citySubgraph = addressSubgraph.addSubgraph(AddressEntity_.city);
-
-        citySubgraph.addAttributeNode(CityEntity_.country);
+        customerGraph.addSubgraph(CustomerEntity_.address).addSubgraph(AddressEntity_.city).addAttributeNode(CityEntity_.country);
 
         return customerGraph;
     }

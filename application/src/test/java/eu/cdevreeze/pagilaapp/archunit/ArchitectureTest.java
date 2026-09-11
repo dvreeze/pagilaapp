@@ -22,6 +22,7 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityAgent;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityManagerFactory;
 
@@ -93,6 +94,13 @@ public class ArchitectureTest {
     public static final ArchRule jpaEntityManagerDependentsRule =
             classes()
                     .that(useClass(EntityManager.class))
+                    .should().resideInAPackage("..service..")
+                    .allowEmptyShould(true);
+
+    @ArchTest
+    public static final ArchRule jpaEntityAgentDependentsRule =
+            classes()
+                    .that(useClass(EntityAgent.class))
                     .should().resideInAPackage("..service..");
 
     @ArchTest

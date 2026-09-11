@@ -18,18 +18,20 @@ package eu.cdevreeze.pagilaapp.service.impl;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import eu.cdevreeze.pagilaapp.entity.*;
+import eu.cdevreeze.pagilaapp.entity.AddressEntity_;
+import eu.cdevreeze.pagilaapp.entity.CityEntity_;
+import eu.cdevreeze.pagilaapp.entity.StoreEntity;
+import eu.cdevreeze.pagilaapp.entity.StoreEntity_;
 import eu.cdevreeze.pagilaapp.entity.conversions.EntityConversions;
 import eu.cdevreeze.pagilaapp.model.Store;
 import eu.cdevreeze.pagilaapp.service.api.StoreService;
+import jakarta.persistence.EntityAgent;
 import jakarta.persistence.EntityGraph;
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.persistence.Subgraph;
+import jakarta.persistence.PersistenceAgent;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Root;
-import org.hibernate.internal.SessionImpl;
+import org.hibernate.internal.StatelessSessionImpl;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBooleanProperty;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,22 +52,22 @@ public class DefaultStoreService implements StoreService {
 
     private static final String LOAD_GRAPH_KEY = "jakarta.persistence.loadgraph";
 
-    // Shared thread-safe proxy for the actual transactional EntityManager that differs for each transaction
-    @PersistenceContext
-    private final EntityManager entityManager;
+    // Shared thread-safe proxy for the actual transactional EntityAgent that differs for each transaction
+    @PersistenceAgent
+    private final EntityAgent entityAgent;
 
-    public DefaultStoreService(EntityManager entityManager) {
-        this.entityManager = entityManager;
+    public DefaultStoreService(EntityAgent entityAgent) {
+        this.entityAgent = entityAgent;
     }
 
     @Override
     @Transactional(readOnly = true)
     public ImmutableList<Store> findAllStores() {
         Preconditions.checkArgument(TransactionSynchronizationManager.isActualTransactionActive());
-        System.out.println("Hibernate SessionImpl: " + entityManager.unwrap(SessionImpl.class));
+        System.out.println("Hibernate StatelessSessionImpl: " + entityAgent.unwrap(StatelessSessionImpl.class));
 
         // First build up the query (without worrying about the load/fetch graph)
-        CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+        CriteriaBuilder cb = entityAgent.getCriteriaBuilder();
         CriteriaQuery<StoreEntity> cq = cb.createQuery(StoreEntity.class);
 
         Root<StoreEntity> storeRoot = cq.from(StoreEntity.class);
@@ -76,10 +78,10 @@ public class DefaultStoreService implements StoreService {
         EntityGraph<StoreEntity> storeGraph = createEntityGraph();
 
         // Run the query, providing the load graph as query hint
-        // Note that JPA entities do not escape the persistence context
+        // Note that JPA entities do not escape the stateless session
         // It is not efficient to first retrieve entities and then convert them to DTOs, but it is practical
         // Note that method getResultStream was avoided; thus I appear to avoid some data loss in the query
-        return entityManager.createQuery(cq)
+        return entityAgent.createQuery(cq)
                 .setHint(LOAD_GRAPH_KEY, storeGraph)
                 .getResultList()
                 .stream()
@@ -89,16 +91,8 @@ public class DefaultStoreService implements StoreService {
     }
 
     private EntityGraph<StoreEntity> createEntityGraph() {
-        EntityGraph<StoreEntity> storeGraph = entityManager.createEntityGraph(StoreEntity.class);
-
-        storeGraph.addAttributeNode(StoreEntity_.address);
-        Subgraph<AddressEntity> addressSubgraph = storeGraph.addSubgraph(StoreEntity_.address);
-
-        addressSubgraph.addAttributeNode(AddressEntity_.city);
-        Subgraph<CityEntity> citySubgraph = addressSubgraph.addSubgraph(AddressEntity_.city);
-
-        citySubgraph.addAttributeNode(CityEntity_.country);
-
+        EntityGraph<StoreEntity> storeGraph = entityAgent.createEntityGraph(StoreEntity.class);
+        storeGraph.addSubgraph(StoreEntity_.address).addSubgraph(AddressEntity_.city).addAttributeNode(CityEntity_.country);
         return storeGraph;
     }
 }
