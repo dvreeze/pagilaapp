@@ -12,7 +12,7 @@
 	<artifactId>application</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<properties>
-		<java.version>21</java.version>
+		<java.version>25</java.version>
 		<!-- For overriding dependency versions in Spring Boot, see https://docs.spring.io/spring-boot/appendix/dependency-versions/properties.html -->
 		<hibernate.version>8.0.0.Beta1</hibernate.version>
 		<jakarta-persistence.version>4.0.0-M5</jakarta-persistence.version>
