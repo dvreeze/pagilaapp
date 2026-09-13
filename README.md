@@ -86,3 +86,73 @@ Is it a module to be used anywhere, without making any assumptions about its con
 that is used in a specific context, such as a Spring application? Libraries are different from application
 modules in this respect. In the case of Java Modules making up the JDK APIs, these modules are aware of
 the JDK as context, in the sense that they often export packages to other JDK modules.
+
+## OIDC authentication with Spring Security against Keycloak
+
+This project uses OIDC-based authentication. The Identity and Access Management (IAM) tool used is Keycloak.
+
+Let's first get a local PostgreSQL Docker container and Keycloak Docker container running, where the Keycloak
+container uses PostgreSQL as its database.
+
+For the PostgreSQL container, the instructions in [Pagila sample database](https://github.com/devrimgunduz/pagila)
+for Docker can be used for inspiration. For Keycloak, name this database "keycloak". Assume that the PostgreSQL
+Docker container has been started with name "postgresql".
+
+Next create a Docker network to be shared by the Keycloak container (to be created) and PostgreSQL:
+
+```bash
+docker network create keycloak-db-network
+docker network connect keycloak-db-network
+```
+
+For Keycloak as Docker image, see [Running Keycloak in a container](https://www.keycloak.org/server/containers).
+
+The container file shown there contains placeholders for DBURL, DBUSERNAME and DBPASSWORD.
+Values for these placeholders could be "jdbc:postgresql://postgresql:5432/keycloak", "postgres" and "postgres", respectively.
+
+Running a Keycloak container in development mode:
+
+```bash
+docker run --name mykeycloak -p 127.0.0.1:8080:8080 \
+        -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=change_me \
+        --network keycloak-db-network \
+        mykeycloak \
+        start-dev
+```
+
+In production model (without having tried it myself):
+
+```bash
+docker run --name mykeycloak -p 8443:8443 -p 9000:9000 \
+        -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=change_me \
+        --network keycloak-db-network \
+        mykeycloak \
+        start --optimized --hostname=localhost
+```
+
+At this point Keycloak should be running as Docker container. For creating a realm, user and client, see
+[Keycloak - Getting started Docker](https://www.keycloak.org/getting-started/getting-started-docker).
+
+For more information on OIDC in Keycloak, see [OIDC layers](https://www.keycloak.org/securing-apps/oidc-layers).
+See also overview page [Securing Apps with Keycloak](https://www.keycloak.org/guides#securing-apps).
+
+The application uses Spring Security to authenticate with OIDC using Keycloak. For more on this, see:
+- [Spring Security](https://docs.spring.io/spring-security/reference/index.html)
+- [Spring Security Architecture](https://docs.spring.io/spring-security/reference/servlet/architecture.html)
+- [Spring Security (Servlets) Getting Started](https://docs.spring.io/spring-security/reference/servlet/getting-started.html)
+- [Spring Security OAuth 2.0](https://docs.spring.io/spring-security/reference/servlet/oauth2/login/core.html)
+- [Spring Boot and Keycloak (Baeldung)](https://www.baeldung.com/spring-boot-keycloak)
+
+## Links to application and Keycloak
+
+First build and start the application (after starting the PostgreSQL and Keycloak containers):
+
+```bash
+$MAVEN_HOME/bin/mvn clean install
+
+$MAVEN_HOME/bin/mvn spring-boot:run
+```
+
+The application can be found at [application home page](http://localhost:8088). Log in with the "normal" user added in Keycloak.
+
+The Keycloak console can be found at [Keycloak console](http://localhost:8080). Log in with admin/admin or the "normal" user added in Keycloak.

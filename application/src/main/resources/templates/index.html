@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Home</title>
+    <!-- See https://bootswatch.com/flatly/ -->
+    <link th:href="@{/css/bootstrap.min.css}" rel="stylesheet">
+</head>
+<!-- For the Bootstrap Grid System, see https://getbootstrap.com/docs/5.2/layout/grid/ -->
+<body>
+<div class="container pt-5">
+    <div class="row gx-5 gy-5">
+        <div class="col-12">
+            <div th:replace="~{fragments/header.html :: header}"></div>
+        </div>
+        <div class="col-12">
+            <div sec:authorize="!isAuthenticated()">
+                <p>You are not logged in.</p>
+                <a class="btn btn-primary" href="/oauth2/authorization/keycloak" role="button">Login</a>
+            </div>
+
+            <div sec:authorize="isAuthenticated()">
+                <p>Welcome, <span th:text="${fullName}">User</span>!</p>
+                <div>
+                    <form th:action="@{/logout}" method="post" style="display:inline;">
+                        <button type="submit">Logout</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"
+        integrity="sha384-ndDqU0Gzau9qJ1lfW4pNLlhNTkCfHzAVBReH9diLvGRem5+R9g2FzA8ZGN954O5Q"
+        crossorigin="anonymous"></script>
+</body>
+</html>

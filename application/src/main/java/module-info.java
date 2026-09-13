@@ -35,10 +35,16 @@ module eu.cdevreeze.pagilaapp.application {
     requires spring.tx; // at runtime
     requires spring.web;
     requires spring.webmvc; // at runtime
+    requires spring.security.core;
+    requires spring.security.config;
+    requires spring.security.web;
     requires tools.jackson.databind;
+    requires org.apache.tomcat.embed.core;
 
     requires eu.cdevreeze.pagilaapp.domain;
     requires eu.cdevreeze.pagilaapp.service;
+    requires spring.security.oauth2.core;
+    requires spring.security.oauth2.client;
 
     opens eu.cdevreeze.pagilaapp to
             spring.core,
