@@ -150,6 +150,7 @@ First build and start the application (after starting the PostgreSQL and Keycloa
 ```bash
 $MAVEN_HOME/bin/mvn clean install
 
+cd application
 $MAVEN_HOME/bin/mvn spring-boot:run
 ```
 
