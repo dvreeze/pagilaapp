@@ -120,7 +120,7 @@ docker run --name mykeycloak -p 127.0.0.1:8080:8080 \
         start-dev
 ```
 
-In production model (without having tried it myself):
+In production mode (without having tried it myself):
 
 ```bash
 docker run --name mykeycloak -p 8443:8443 -p 9000:9000 \
