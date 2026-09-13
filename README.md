@@ -102,7 +102,7 @@ Next create a Docker network to be shared by the Keycloak container (to be creat
 
 ```bash
 docker network create keycloak-db-network
-docker network connect keycloak-db-network
+docker network connect keycloak-db-network postgresql
 ```
 
 For Keycloak as Docker image, see [Running Keycloak in a container](https://www.keycloak.org/server/containers).
