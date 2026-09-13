@@ -65,6 +65,7 @@ module eu.cdevreeze.pagilaapp.application {
             spring.aop,
             spring.web,
             spring.webmvc;
+    opens eu.cdevreeze.pagilaapp.web.security to spring.beans;
 
     // No need to export any packages, right?
 }
