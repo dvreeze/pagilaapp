@@ -154,6 +154,6 @@ cd application
 $MAVEN_HOME/bin/mvn spring-boot:run
 ```
 
-The application can be found at "http://localhost:8088". Log in with the "normal" user added in Keycloak.
+The application can be found at [localhost:8088](http://localhost:8088) (broken link unless running). Log in with the "normal" user added in Keycloak.
 
-The Keycloak console can be found at "http://localhost:8080". Log in with user admin or the "normal" user added in Keycloak.
+The Keycloak console can be found at [localhost:8080](http://localhost:8080) (broken link unless running). Log in with user admin or the "normal" user added in Keycloak.
