@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns="http://www.w3.org/1999/html" lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -15,12 +15,12 @@
             <div th:replace="~{fragments/header.html :: header}"></div>
         </div>
         <div class="col-12">
-            <div sec:authorize="!isAuthenticated()">
+            <div th:if="${!isAuthenticated}">
                 <p>You are not logged in.</p>
                 <a class="btn btn-primary" href="/oauth2/authorization/keycloak" role="button">Login</a>
             </div>
 
-            <div sec:authorize="isAuthenticated()">
+            <div th:if="${isAuthenticated}">
                 <p>Welcome, <span th:text="${fullName}">User</span>!</p>
                 <div>
                     <form th:action="@{/logout}" method="post" style="display:inline;">

@@ -146,7 +146,9 @@ The application uses Spring Security to authenticate with OIDC using Keycloak. F
 For the integration of Thymeleaf and Spring Security, see:
 - [Thymeleaf + Spring Security](https://www.thymeleaf.org/doc/articles/springsecurity.html)
 - not used outside JSPs: [Spring Security JSP Tag Libraries](https://docs.spring.io/spring-security/reference/servlet/integrations/jsp-taglibs.html)
-- its replacement: [thymeleaf-extras-springsecurity](https://github.com/thymeleaf/thymeleaf-extras-springsecurity)
+- its replacement (now archived): [thymeleaf-extras-springsecurity](https://github.com/thymeleaf/thymeleaf-extras-springsecurity)
+
+There is always the option of keeping such logic out of the view, and instead move it to the controller.
 
 ## Links to application and Keycloak
 

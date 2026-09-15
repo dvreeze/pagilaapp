@@ -44,6 +44,10 @@ public class HomeController {
                 .map(OidcUserInfo::getFullName)
                 .orElse("");
         model.addAttribute("fullName", fullName);
+
+        boolean isAuthenticated = principal != null;
+        model.addAttribute("isAuthenticated", isAuthenticated);
+
         return "index";
     }
 }
