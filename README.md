@@ -143,6 +143,11 @@ The application uses Spring Security to authenticate with OIDC using Keycloak. F
 - [Spring Security OAuth 2.0](https://docs.spring.io/spring-security/reference/servlet/oauth2/login/core.html)
 - [Spring Boot and Keycloak (Baeldung)](https://www.baeldung.com/spring-boot-keycloak)
 
+For the integration of Thymeleaf and Spring Security, see:
+- [Thymeleaf + Spring Security](https://www.thymeleaf.org/doc/articles/springsecurity.html)
+- not used outside JSPs: [Spring Security JSP Tag Libraries](https://docs.spring.io/spring-security/reference/servlet/integrations/jsp-taglibs.html)
+- its replacement: [thymeleaf-extras-springsecurity](https://github.com/thymeleaf/thymeleaf-extras-springsecurity)
+
 ## Links to application and Keycloak
 
 First build and start the application (after starting the PostgreSQL and Keycloak containers):
